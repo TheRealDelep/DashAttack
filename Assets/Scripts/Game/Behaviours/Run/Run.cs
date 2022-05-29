@@ -5,13 +5,24 @@ namespace DashAttack.Game.Behaviours.Run
 {
     public class Run : MonoBehaviour, IBehaviour<IRunData, IRunInput>
     {
+        private float currentVelocity;
+
         void IBehaviour<IRunData, IRunInput>.Run(IPhysicsObject physicsObject, IRunData data, IRunInput input)
         {
-            physicsObject.Move(data.MaxSpeed * Time.fixedDeltaTime * input.RunDirection, 0);
+
         }
 
         public void Reset()
         {
         }
+    }
+
+    public enum RunState
+    {
+        Rest,
+        Accelerating,
+        Braking,
+        Turning,
+        AtMaxSpeed
     }
 }
