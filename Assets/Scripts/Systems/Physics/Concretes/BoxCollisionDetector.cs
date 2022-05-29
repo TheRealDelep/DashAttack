@@ -91,7 +91,8 @@ namespace TheRealDelep.Physics.Concretes
                 axis: Vector2.right,
                 direction: Vector2.up * Mathf.Sign(y),
                 distance: Mathf.Abs(y),
-                space: space);
+                space: space, 
+                bufferStartIndex: nbRays);
         }
 
         private void CheckDiagonal(Vector2 movement)
@@ -107,7 +108,7 @@ namespace TheRealDelep.Physics.Concretes
             for (int i = 0; i < NbRays; i++)
             {
                 var rayOrigin = firstRayPosition + (i * space * axis);
-                var hit = Physics2D.Raycast(rayOrigin, direction, distance);
+                var hit = Physics2D.Raycast(rayOrigin, direction, distance + skinWidth);
 
                 if (hit)
                 {
@@ -117,15 +118,10 @@ namespace TheRealDelep.Physics.Concretes
                 hitBuffer[i + bufferStartIndex] = hit;
 
 #if UNITY_EDITOR
-                //if (hit)
-                //{
-                //    Debug.Log("Hit");
-                //}
-
-                //if (drawDebugRays)
-                //{
-                //    Debug.DrawRay(rayOrigin, direction * distance, debugRayColor);
-                //}
+                if (drawDebugRays)
+                {
+                    Debug.DrawRay(rayOrigin, direction * distance, debugRayColor);
+                }
 #endif
             }
         }

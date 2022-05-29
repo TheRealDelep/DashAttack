@@ -9,7 +9,7 @@ namespace DashAttack.Game.Behaviours.Fall
 
         public void Run(IPhysicsObject physicsObject, IFallData data, IFallInput input)
         {
-            if (input.CanFall)
+            if (!input.CanFall)
             {
                 currentVelocity = 0;
             }

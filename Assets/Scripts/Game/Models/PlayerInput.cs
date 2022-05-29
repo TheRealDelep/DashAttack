@@ -11,11 +11,9 @@ namespace DashAttack.Game.Models
     {
         private IPhysicsObject physicsObject;
 
-        public float RunDirection
-            => InputManager.Instance.Move;
+        public float RunDirection => InputManager.Instance.Move;
 
-        public bool CanFall
-            => physicsObject.CurrentCollisions.Any(h => Vector2.Dot(Vector2.up, h.normal) > 0.001f);
+        public bool CanFall => !physicsObject.CurrentCollisions.Any(h => Vector2.Dot(Vector2.up, h.normal) > 0.001f);
 
         public void Init(IPhysicsObject physicsObject)
         {

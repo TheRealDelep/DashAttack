@@ -10,7 +10,7 @@ namespace DashAttack.Game.Managers
 
         public float Move => actions.Default.Move.ReadValue<float>();
 
-        private void Start()
+        private void Awake()
         {
             if (Instance is not null)
             {
