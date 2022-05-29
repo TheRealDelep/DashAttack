@@ -7,7 +7,11 @@ namespace DashAttack.Game.Behaviours.Fall
     {
         private float currentVelocity;
 
-        public void Run(IPhysicsObject physicsObject, IFallData data, IFallInput input)
+        private IPhysicsObject physicsObject;
+        private IFallData data;
+        private IFallInput input;
+
+        public void Execute()
         {
             if (!input.CanFall)
             {
@@ -16,6 +20,13 @@ namespace DashAttack.Game.Behaviours.Fall
 
             currentVelocity -= Mathf.Abs(data.Gravity) * Time.fixedDeltaTime * Time.fixedDeltaTime;
             physicsObject.Move(0, currentVelocity);
+        }
+
+        public void Init(IPhysicsObject physicsObject, IFallData data, IFallInput input)
+        {
+            this.physicsObject = physicsObject;
+            this.data = data;
+            this.input = input;
         }
 
         public void Reset()

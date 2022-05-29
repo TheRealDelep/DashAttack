@@ -396,9 +396,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 10
-  accelerationTime: 1
-  brakingTime: 1
-  turningTime: 1
+  accelerationTime: 0.3
+  brakingTime: 0.2
+  turningTime: 0.1
   airControlAmount: 1
 --- !u!1 &1158414454
 GameObject:

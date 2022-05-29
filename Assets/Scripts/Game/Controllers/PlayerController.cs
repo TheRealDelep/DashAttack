@@ -21,18 +21,21 @@ namespace DashAttack.Game.Controllers
         {
             physicsObject = GetComponent<IPhysicsObject>();
 
-            fall = new Fall();
-            run = new Run();
-
             player = GetComponent<Player>();
             inputs = new PlayerInputs();
             inputs.Init(physicsObject);
+
+            fall = new Fall();
+            run = new Run();
+
+            fall.Init(physicsObject, player, inputs);
+            run.Init(physicsObject, player, inputs);
         }
 
         private void FixedUpdate()
         {
-            fall.Run(physicsObject, player, inputs);
-            run.Run(physicsObject, player, inputs);
+            fall.Execute();
+            run.Execute();
         }
     }
 

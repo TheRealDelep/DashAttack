@@ -16,7 +16,7 @@ namespace TheRealDelep.StateMachine
         public TStateEnum CurrentState { get; private set; }
         public TStateEnum PreviousState { get; private set; }
 
-        public void AddState(TStateEnum stateEnum, Action onStateEnter = null, Action onStateLeave = null, Action onStateUpdate = null, bool isEntryState = false)
+        public void AddState(TStateEnum stateEnum, Action onStateEnter = null, Action onStateLeave = null, Action onStateUpdate = null)
         {
             if (states.ContainsKey(stateEnum))
             {
@@ -30,11 +30,6 @@ namespace TheRealDelep.StateMachine
             state.StateUpdated += onStateUpdate;
 
             states.Add(stateEnum, state);
-
-            if (isEntryState)
-            {
-                entryState = stateEnum;
-            }
         }
 
         public void RunMachine()
@@ -42,8 +37,14 @@ namespace TheRealDelep.StateMachine
             states[CurrentState].OnStateUpdate();
         }
 
-        public void Start()
+        public void Start(TStateEnum entryState)
         {
+            if (!states.ContainsKey(entryState))
+            {
+                throw new ArgumentException($"StateMachine doesn't contain a state of type {entryState}");
+            }
+
+            this.entryState = entryState;
             CurrentState = entryState;
         }
 
