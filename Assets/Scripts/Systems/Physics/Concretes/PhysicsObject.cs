@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using TheRealDelep.Physics.Interfaces;
 using UnityEngine;
 
@@ -7,23 +9,32 @@ namespace TheRealDelep.Physics.Concretes
     [RequireComponent(typeof(Rigidbody2D))]
     public class PhysicsObject : MonoBehaviour, IPhysicsObject
     {
-        public Vector2 Velocity { get; private set; }
+        public event Action<IEnumerable<RaycastHit2D>> OnCollisionEnter;
+        public event Action<IEnumerable<RaycastHit2D>> OnCollisionExit;
 
         private Rigidbody2D rb;
         private ICollisionDetector collisionDetector;
+
+        public Vector2 Velocity { get; private set; }
+
+        public IEnumerable<RaycastHit2D> CurrentCollisions { get; private set; } = Enumerable.Empty<RaycastHit2D>();
+
+        public Vector2 Position => rb.velocity;
 
         public void Move(float x, float y)
             => Velocity += new Vector2(x, y);
 
         private void UpdatePosition()
         {
-            var collisions = collisionDetector.GetNearestCollisions(Velocity);
-            foreach (var collision in collisions)
+            var hits = collisionDetector.GetNearestCollisions(Velocity);
+            foreach (var hit in hits)
             {
-                CorrectVelocity(collision);
+                CorrectVelocity(hit);
             }
 
             rb.MovePosition(rb.position + Velocity);
+            UpdateCollisions(hits);
+
             Velocity = Vector2.zero;
         }
 
@@ -35,6 +46,17 @@ namespace TheRealDelep.Physics.Concretes
             Velocity = new Vector2(
                 dotX < 0.001f ? Velocity.x : collision.distance * Mathf.Sign(Velocity.x),
                 dotY < 0.001f ? Velocity.y : collision.distance * Mathf.Sign(Velocity.y));
+        }
+
+        private void UpdateCollisions(IEnumerable<RaycastHit2D> hits)
+        {
+            var newCollisions = hits.Except(CurrentCollisions);
+            var oldCollisions = CurrentCollisions.Except(hits);
+
+            CurrentCollisions = hits;
+
+            OnCollisionEnter?.Invoke(newCollisions);
+            OnCollisionExit?.Invoke(oldCollisions);
         }
 
         private void Start()
