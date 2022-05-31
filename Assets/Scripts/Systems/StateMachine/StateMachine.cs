@@ -11,7 +11,8 @@ namespace TheRealDelep.StateMachine
     {
         private Dictionary<TStateEnum, State<TStateEnum>> states = new();
 
-        private TStateEnum entryState;
+        private event Action beforeStateUpdate;
+        private event Action afterStateUpdate;
 
         public TStateEnum CurrentState { get; private set; }
         public TStateEnum PreviousState { get; private set; }
@@ -34,7 +35,9 @@ namespace TheRealDelep.StateMachine
 
         public void RunMachine()
         {
+            beforeStateUpdate?.Invoke();
             states[CurrentState].OnStateUpdate();
+            afterStateUpdate?.Invoke();
         }
 
         public void Start(TStateEnum entryState)
@@ -44,15 +47,18 @@ namespace TheRealDelep.StateMachine
                 throw new ArgumentException($"StateMachine doesn't contain a state of type {entryState}");
             }
 
-            this.entryState = entryState;
             CurrentState = entryState;
         }
 
         public void TransitionTo(TStateEnum nextState)
         {
+            PreviousState = CurrentState;
+
             states[CurrentState].OnStateLeave();
             CurrentState = nextState;
+
             states[CurrentState].OnStateEnter();
+            states[CurrentState].OnStateUpdate();
         }
 
         public void Subscribe(TStateEnum state, StateEvent stateEvent, Action action)
@@ -73,12 +79,10 @@ namespace TheRealDelep.StateMachine
             }
         }
 
-        public void SubscribeAnyState(StateEvent stateEvent, Action action)
-        {
-            foreach (var state in states)
-            {
-                Subscribe(state.Value.Type, stateEvent, action);
-            }
-        }
+        public void SubscribeBeforeUpdate(Action action)
+            => beforeStateUpdate += action;
+
+        public void SubscribeAfterUpdate(Action action)
+            => afterStateUpdate += action;
     }
 }

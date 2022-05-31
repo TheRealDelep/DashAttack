@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using TheRealDelep.StateMachine;
+using UnityEngine;
 
 using static DashAttack.Game.Behaviours.Run.RunState;
 
@@ -9,6 +11,8 @@ namespace DashAttack.Game.Behaviours.Run
         private float currentVelocity;
         private float lastFrameVelocity;
         private float lastFrameRunDirection;
+
+        private bool isTurningFrame;
 
         public override RunState CurrentState => stateMachine.CurrentState;
 
@@ -25,6 +29,11 @@ namespace DashAttack.Game.Behaviours.Run
         public override void Reset()
             => CurrentVelocity = 0;
 
+        private float AerialMod
+            => physicsObject.CurrentCollisions.Any(h => h.normal == Vector2.up)
+             ? data.AirControlAmount
+             : 1;
+
         protected override void InitStateMachine()
         {
             stateMachine = new();
@@ -32,10 +41,32 @@ namespace DashAttack.Game.Behaviours.Run
             stateMachine.AddState(Rest, onStateEnter: OnRestEnter, onStateUpdate: OnRestUpdate);
             stateMachine.AddState(Accelerating, onStateUpdate: OnAcceleratingUpdate);
             stateMachine.AddState(Braking, onStateUpdate: OnBrakingUpdate);
-            stateMachine.AddState(Turning, onStateUpdate: OnTurningUpdate);
+            stateMachine.AddState(Turning, onStateEnter: OnTurningEnter, onStateUpdate: OnTurningUpdate);
             stateMachine.AddState(AtMaxSpeed, onStateUpdate: OnMaxSpeedUpdate);
 
+            stateMachine.SubscribeBeforeUpdate(BeforeStateUpdate);
+            stateMachine.SubscribeAfterUpdate(AfterStateUpdate);
+
             stateMachine.Start(Rest);
+        }
+
+        private void BeforeStateUpdate()
+        {
+            if (physicsObject.CurrentCollisions.Any(h => h.normal.x == -Mathf.Sign(CurrentVelocity)))
+            {
+                CurrentVelocity = 0;
+            }
+        }
+
+        private void AfterStateUpdate()
+        {
+            if (CurrentVelocity != 0)
+            {
+                Debug.Log($"CurrentState: {CurrentState}, Velocity: {CurrentVelocity}");
+                physicsObject.Move(CurrentVelocity * Time.fixedDeltaTime, 0);
+            }
+
+            lastFrameRunDirection = input.RunDirection;
         }
 
         private void OnRestEnter() => Reset();
@@ -46,8 +77,6 @@ namespace DashAttack.Game.Behaviours.Run
             {
                 stateMachine.TransitionTo(Accelerating);
             }
-
-            lastFrameRunDirection = input.RunDirection;
         }
 
         private void OnAcceleratingUpdate()
@@ -55,7 +84,7 @@ namespace DashAttack.Game.Behaviours.Run
             RunState? nextState = input.RunDirection switch
             {
                 0 => Braking,
-                _ when Mathf.Sign(input.RunDirection) != Mathf.Sign(lastFrameRunDirection) => Turning,
+                _ when Mathf.Sign(input.RunDirection) != Mathf.Sign(lastFrameRunDirection) && lastFrameRunDirection != 0 => Turning,
                 _ when Mathf.Abs(CurrentVelocity) == data.MaxSpeed => AtMaxSpeed,
                 _ => null
             };
@@ -66,40 +95,44 @@ namespace DashAttack.Game.Behaviours.Run
                 return;
             }
 
-            CurrentVelocity += data.MaxSpeed / data.AccelerationTime * input.RunDirection * Time.fixedDeltaTime;
-            physicsObject.Move(CurrentVelocity * Time.fixedDeltaTime, 0);
-
-            lastFrameRunDirection = input.RunDirection;
+            CurrentVelocity += data.MaxSpeed / data.AccelerationTime * input.RunDirection * AerialMod * Time.fixedDeltaTime;
         }
 
         private void OnBrakingUpdate()
         {
             RunState? nextState = input.RunDirection switch
             {
-                not 0 when Mathf.Sign(input.RunDirection) != Mathf.Sign(CurrentVelocity) => Accelerating,
-                not 0 when Mathf.Sign(input.RunDirection) != Mathf.Sign(lastFrameRunDirection) => Turning,
+                not 0 when Mathf.Sign(input.RunDirection) == Mathf.Sign(CurrentVelocity) => Accelerating,
+                not 0 when Mathf.Sign(input.RunDirection) != Mathf.Sign(CurrentVelocity) => Turning,
                 _ when CurrentVelocity == 0 => Rest,
-                _ when Mathf.Sign(CurrentVelocity) != Mathf.Sign(lastFrameVelocity) => Rest,
                 _ => null
             };
 
             if (nextState.HasValue)
             {
                 stateMachine.TransitionTo(nextState.Value);
+                return;
             }
 
-            CurrentVelocity -= data.MaxSpeed / data.BrakingTime * Mathf.Sign(CurrentVelocity) * Time.fixedDeltaTime;
-            physicsObject.Move(currentVelocity * Time.fixedDeltaTime, 0);
+            CurrentVelocity -= data.MaxSpeed / data.BrakingTime * Mathf.Sign(CurrentVelocity) * AerialMod * Time.fixedDeltaTime;
 
-            lastFrameRunDirection = input.RunDirection;
+            if (Mathf.Sign(CurrentVelocity) != Mathf.Sign(lastFrameVelocity))
+            {
+                stateMachine.TransitionTo(Rest);
+            }
+
         }
+
+        private void OnTurningEnter()
+            => isTurningFrame = true;
 
         private void OnTurningUpdate()
         {
             RunState? nextState = input.RunDirection switch
             {
                 0 => Braking,
-                _ when Mathf.Sign(input.RunDirection) != Mathf.Sign(lastFrameRunDirection) => Accelerating,
+                _ when Mathf.Sign(input.RunDirection) != Mathf.Sign(lastFrameRunDirection)
+                    && lastFrameRunDirection != 0 && !isTurningFrame => Accelerating,
                 _ when Mathf.Sign(CurrentVelocity) != Mathf.Sign(lastFrameVelocity) => Accelerating,
                 _ => null
             };
@@ -107,12 +140,11 @@ namespace DashAttack.Game.Behaviours.Run
             if (nextState.HasValue)
             {
                 stateMachine.TransitionTo(nextState.Value);
+                return;
             }
 
-            CurrentVelocity += data.MaxSpeed / data.TurningTime * input.RunDirection * Time.fixedDeltaTime;
-            physicsObject.Move(currentVelocity * Time.fixedDeltaTime, 0);
-
-            lastFrameRunDirection = input.RunDirection;
+            CurrentVelocity += data.MaxSpeed / data.TurningTime * input.RunDirection * AerialMod * Time.fixedDeltaTime;
+            isTurningFrame = false;
         }
 
         private void OnMaxSpeedUpdate()
@@ -121,18 +153,17 @@ namespace DashAttack.Game.Behaviours.Run
             {
                 0 => Braking,
                 _ when Mathf.Sign(input.RunDirection) != Mathf.Sign(lastFrameRunDirection) => Turning,
+                _ when Mathf.Abs(CurrentVelocity) != data.MaxSpeed => Accelerating,
                 _ => null
             };
 
             if (nextState.HasValue)
             {
                 stateMachine.TransitionTo(nextState.Value);
+                return;
             }
 
             CurrentVelocity = data.MaxSpeed * input.RunDirection;
-            physicsObject.Move(currentVelocity * Time.fixedDeltaTime, 0);
-
-            lastFrameRunDirection = input.RunDirection;
         }
     }
 }

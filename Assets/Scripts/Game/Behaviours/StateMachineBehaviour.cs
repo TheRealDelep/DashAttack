@@ -23,8 +23,6 @@ namespace DashAttack.Game.Behaviours
         public void Execute()
         {
             stateMachine.RunMachine();
-
-            Debug.Log(CurrentState);
         }
 
         public abstract void Reset();
