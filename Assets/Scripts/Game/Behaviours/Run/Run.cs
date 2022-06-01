@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using TheRealDelep.StateMachine;
 using UnityEngine;
 
 using static DashAttack.Game.Behaviours.Run.RunState;
@@ -62,7 +61,6 @@ namespace DashAttack.Game.Behaviours.Run
         {
             if (CurrentVelocity != 0)
             {
-                Debug.Log($"CurrentState: {CurrentState}, Velocity: {CurrentVelocity}");
                 physicsObject.Move(CurrentVelocity * Time.fixedDeltaTime, 0);
             }
 

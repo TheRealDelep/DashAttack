@@ -1,17 +1,12 @@
-﻿using TheRealDelep.Physics.Interfaces;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace DashAttack.Game.Behaviours.Fall
 {
-    public class Fall : IBehaviour<IFallData, IFallInput>
+    public class Fall : BaseBehaviour<IFallData, IFallInput>
     {
         private float currentVelocity;
 
-        private IPhysicsObject physicsObject;
-        private IFallData data;
-        private IFallInput input;
-
-        public void Execute()
+        public override void Execute()
         {
             if (!input.CanFall)
             {
@@ -22,14 +17,7 @@ namespace DashAttack.Game.Behaviours.Fall
             physicsObject.Move(0, currentVelocity);
         }
 
-        public void Init(IPhysicsObject physicsObject, IFallData data, IFallInput input)
-        {
-            this.physicsObject = physicsObject;
-            this.data = data;
-            this.input = input;
-        }
-
-        public void Reset()
+        public override void Reset()
             => currentVelocity = 0;
     }
 }
