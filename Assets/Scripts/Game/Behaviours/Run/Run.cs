@@ -35,7 +35,7 @@ namespace DashAttack.Game.Behaviours.Run
 
         protected override void InitStateMachine()
         {
-            stateMachine = new();
+            base.InitStateMachine();
 
             stateMachine.AddState(Rest, onStateEnter: OnRestEnter, onStateUpdate: OnRestUpdate);
             stateMachine.AddState(Accelerating, onStateUpdate: OnAcceleratingUpdate);

@@ -8,7 +8,8 @@ namespace DashAttack.Game.Managers
 
         public static InputManager Instance { get; private set; }
 
-        public float Move => actions.Default.Move.ReadValue<float>();
+        public float Move { get; private set; }
+        public bool Jump { get; private set; }
 
         private void Awake()
         {
@@ -22,6 +23,17 @@ namespace DashAttack.Game.Managers
             DontDestroyOnLoad(this);
 
             actions = new InputActions();
+        }
+
+        private void Update()
+        {
+            Move = actions.Default.Move.ReadValue<float>();
+            Jump = actions.Default.Jump.ReadValue<float>() > 0;
+        }
+
+        private void FixedUpdate()
+        {
+
         }
 
         private void OnEnable()

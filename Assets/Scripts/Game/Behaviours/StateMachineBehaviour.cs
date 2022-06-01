@@ -13,7 +13,7 @@ namespace DashAttack.Game.Behaviours
     {
         protected StateMachine<TState> stateMachine;
 
-        public abstract TState CurrentState { get; }
+        public virtual TState CurrentState => stateMachine.CurrentState;
 
         public void Subscribe(TState state, StateEvent stateEvent, Action action)
             => stateMachine.Subscribe(state, stateEvent, action);
@@ -29,6 +29,9 @@ namespace DashAttack.Game.Behaviours
             InitStateMachine();
         }
 
-        protected abstract void InitStateMachine();
+        protected virtual void InitStateMachine()
+        {
+            stateMachine = new();
+        }
     }
 }

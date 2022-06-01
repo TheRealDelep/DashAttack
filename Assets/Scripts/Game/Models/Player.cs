@@ -1,12 +1,14 @@
 ﻿using DashAttack.Game.Behaviours.Fall;
+using DashAttack.Game.Behaviours.Jump;
 using DashAttack.Game.Behaviours.Run;
+using System;
 using UnityEngine;
 
 namespace DashAttack.Game.Models
 {
-    public class Player : MonoBehaviour, IRunData, IFallData
+    public class Player : MonoBehaviour, IRunData, IFallData, IJumpData
     {
-        [SerializeField]
+        [SerializeField, Header("Run Data")]
         private float maxSpeed;
 
         [SerializeField]
@@ -20,6 +22,12 @@ namespace DashAttack.Game.Models
 
         [SerializeField]
         private float airControlAmount;
+
+        [SerializeField, Header("Jump Data")]
+        private float jumpHeight;
+
+        [SerializeField]
+        private float jumpDistance;
 
         public float MaxSpeed
         {
@@ -51,11 +59,42 @@ namespace DashAttack.Game.Models
             private set => airControlAmount = Mathf.Clamp(value, 0, 1);
         }
 
-        public float Gravity => Physics2D.gravity.y;
+        public float JumpHeight
+        {
+            get => jumpHeight;
+            private set => jumpHeight = Mathf.Clamp(value, 1, int.MaxValue);
+        }
+
+        public float JumpDistance
+        {
+            get => jumpDistance;
+            private set => jumpDistance = Mathf.Clamp(value, 1, int.MaxValue);
+        }
+
+        public float JumpVelocity { get; private set; }
+
+        public float Gravity { get; private set; }
 
         private void OnValidate()
         {
             MaxSpeed = maxSpeed;
+            AccelerationTime = accelerationTime;
+            BrakingTime = brakingTime;
+            TurningTime = turningTime;
+            AirControlAmount = airControlAmount;
+
+            JumpHeight = jumpHeight;
+            JumpDistance = jumpDistance;
+
+            ComputeJumpVelocity();
+        }
+
+        private void ComputeJumpVelocity()
+        {
+            var jumpTime = JumpDistance / MaxSpeed / 2;
+
+            Gravity = (2 * JumpHeight) / Mathf.Pow(jumpTime, 2);
+            JumpVelocity = Gravity * jumpTime;
         }
     }
 }

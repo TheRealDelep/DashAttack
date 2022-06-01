@@ -396,10 +396,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 10
-  accelerationTime: 0.3
+  accelerationTime: 0.1
   brakingTime: 0.2
   turningTime: 0.1
   airControlAmount: 1
+  jumpHeight: 5
+  jumpDistance: 10
 --- !u!1 &1158414454
 GameObject:
   m_ObjectHideFlags: 0

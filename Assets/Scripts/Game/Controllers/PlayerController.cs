@@ -1,5 +1,6 @@
 ﻿using DashAttack.Game.Behaviours;
 using DashAttack.Game.Behaviours.Fall;
+using DashAttack.Game.Behaviours.Jump;
 using DashAttack.Game.Behaviours.Run;
 using DashAttack.Game.Models;
 using TheRealDelep.Physics.Interfaces;
@@ -15,7 +16,8 @@ namespace DashAttack.Game.Controllers
         private PlayerInputs inputs;
 
         private IBehaviour<IFallData, IFallInput> fall;
-        private IBehaviour<IRunData, IRunInput> run;
+        private IStateMachineBehaviour<IRunData, IRunInput, RunState> run;
+        private IStateMachineBehaviour<IJumpData, IJumpInput, JumpState> jump;
 
         private void Start()
         {
@@ -27,15 +29,22 @@ namespace DashAttack.Game.Controllers
 
             fall = new Fall();
             run = new Run();
+            jump = new Jump();
 
             fall.Init(physicsObject, player, inputs);
             run.Init(physicsObject, player, inputs);
+            jump.Init(physicsObject, player, inputs);
         }
 
         private void FixedUpdate()
         {
-            fall.Execute();
             run.Execute();
+            jump.Execute();
+
+            if (jump.CurrentState == JumpState.Rest)
+            {
+                fall.Execute();
+            }
         }
     }
 

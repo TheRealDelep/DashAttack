@@ -15,7 +15,7 @@ namespace TheRealDelep.Physics.Concretes
         private Rigidbody2D rb;
         private ICollisionDetector collisionDetector;
 
-        public Vector2 Velocity { get; private set; }
+        public Vector2 Velocity { get; private set; } = Vector2.zero;
 
         public IEnumerable<RaycastHit2D> CurrentCollisions { get; private set; } = Enumerable.Empty<RaycastHit2D>();
 
