@@ -84,7 +84,9 @@ namespace DashAttack.Game.Behaviours.Run
             RunState? nextState = input.RunDirection switch
             {
                 0 => Braking,
-                _ when Mathf.Sign(input.RunDirection) != Mathf.Sign(lastFrameRunDirection) && lastFrameRunDirection != 0 => Turning,
+                _ when Mathf.Sign(input.RunDirection) != Mathf.Sign(lastFrameRunDirection)
+                    && lastFrameRunDirection != 0
+                    && stateMachine.PreviousState != Turning => Turning,
                 _ when Mathf.Abs(CurrentVelocity) == data.MaxSpeed => AtMaxSpeed,
                 _ => null
             };
@@ -120,7 +122,6 @@ namespace DashAttack.Game.Behaviours.Run
             {
                 stateMachine.TransitionTo(Rest);
             }
-
         }
 
         private void OnTurningEnter()
@@ -132,7 +133,8 @@ namespace DashAttack.Game.Behaviours.Run
             {
                 0 => Braking,
                 _ when Mathf.Sign(input.RunDirection) != Mathf.Sign(lastFrameRunDirection)
-                    && lastFrameRunDirection != 0 && !isTurningFrame => Accelerating,
+                    && lastFrameRunDirection != 0
+                    && !isTurningFrame => Accelerating,
                 _ when Mathf.Sign(CurrentVelocity) != Mathf.Sign(lastFrameVelocity) => Accelerating,
                 _ => null
             };
