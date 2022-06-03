@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using TheRealDelep.Physics.Interfaces;
 using UnityEngine;
 
@@ -26,6 +24,15 @@ namespace DashAttack.Game.Behaviours.WallStick
                     wallSticked = true;
                 }
             };
+
+            this.physicsObject.OnCollisionExit += hits =>
+            {
+                if (hits.Any(h => h.normal == Vector2.up) &&
+                    physicsObject.CurrentCollisions.Any(h => h.normal == Vector2.right || h.normal == Vector2.left))
+                {
+                    wallSticked = true;
+                }
+            };
         }
 
         public override void Update()
@@ -36,9 +43,9 @@ namespace DashAttack.Game.Behaviours.WallStick
                 if (elapsedTimeOnWall >= data.WallStickTime)
                 {
                     wallSticked = false;
+                    elapsedTimeOnWall = 0;
                 }
             }
         }
     }
-
 }

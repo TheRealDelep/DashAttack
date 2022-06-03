@@ -54,11 +54,6 @@ namespace TheRealDelep.Physics.Concretes
 
         private void CheckHorizontal(float x)
         {
-            if (x == 0)
-            {
-                return;
-            }
-
             var space = GetRaySpacing(boxCollider.bounds.size.y);
 
             var firstRayPosition = boxCollider.attachedRigidbody.position + new Vector2(
@@ -75,11 +70,6 @@ namespace TheRealDelep.Physics.Concretes
 
         private void CheckVertical(float y)
         {
-            if (y == 0)
-            {
-                return;
-            }
-
             var space = GetRaySpacing(boxCollider.bounds.size.x);
 
             var firstRayPosition = boxCollider.attachedRigidbody.position + new Vector2(
@@ -91,22 +81,19 @@ namespace TheRealDelep.Physics.Concretes
                 axis: Vector2.right,
                 direction: Vector2.up * Mathf.Sign(y),
                 distance: Mathf.Abs(y),
-                space: space, 
+                space: space,
                 bufferStartIndex: nbRays);
-        }
-
-        private void CheckDiagonal(Vector2 movement)
-        {
-            if (movement.x == 0 || movement.y == 0)
-            {
-                return;
-            }
         }
 
         private void CastRays(Vector2 firstRayPosition, Vector2 axis, Vector2 direction, float space, float distance, int bufferStartIndex = 0)
         {
             for (int i = 0; i < NbRays; i++)
             {
+                if (distance == 0)
+                {
+                    hitBuffer[i + bufferStartIndex] = default;
+                }
+
                 var rayOrigin = firstRayPosition + (i * space * axis);
                 var hit = Physics2D.Raycast(rayOrigin, direction, distance + skinWidth);
 
