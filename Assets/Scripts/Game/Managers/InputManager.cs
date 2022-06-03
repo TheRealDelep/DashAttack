@@ -8,8 +8,14 @@ namespace DashAttack.Game.Managers
 
         public static InputManager Instance { get; private set; }
 
+        private bool lastFixedFrameJump;
+
         public float Move { get; private set; }
         public bool Jump { get; private set; }
+
+        public bool JumpPressedThisFixedFrame { get; private set; }
+        public bool JumpReleasedThisFixedFrame { get; private set; }
+
 
         private void Awake()
         {
@@ -33,7 +39,10 @@ namespace DashAttack.Game.Managers
 
         private void FixedUpdate()
         {
+            JumpPressedThisFixedFrame = Jump && !lastFixedFrameJump;
+            JumpReleasedThisFixedFrame = lastFixedFrameJump && !Jump;
 
+            lastFixedFrameJump = Jump;
         }
 
         private void OnEnable()

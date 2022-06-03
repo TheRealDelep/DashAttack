@@ -9,6 +9,8 @@ namespace DashAttack.Game.Behaviours
         protected TData data;
         protected TInput input;
 
+        public abstract bool IsExecuting { get; }
+
         public virtual void Init(IPhysicsObject physicsObject, TData data, TInput input)
         {
             this.physicsObject = physicsObject;
@@ -20,6 +22,6 @@ namespace DashAttack.Game.Behaviours
         {
         }
 
-        public abstract void Execute();
+        public abstract void Update();
     }
 }

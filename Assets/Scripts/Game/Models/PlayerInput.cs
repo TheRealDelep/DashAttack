@@ -14,9 +14,9 @@ namespace DashAttack.Game.Models
 
         public float RunDirection => InputManager.Instance.Move;
         public bool Jump => InputManager.Instance.Jump;
+        public bool JumpPressedThisFixedFrame => InputManager.Instance.JumpPressedThisFixedFrame;
 
         public bool CanFall => !physicsObject.CurrentCollisions.Any(h => Vector2.Dot(Vector2.up, h.normal) > 0.001f);
-
 
         public void Init(IPhysicsObject physicsObject)
         {

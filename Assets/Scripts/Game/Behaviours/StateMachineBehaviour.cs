@@ -18,7 +18,7 @@ namespace DashAttack.Game.Behaviours
         public void Subscribe(TState state, StateEvent stateEvent, Action action)
             => stateMachine.Subscribe(state, stateEvent, action);
 
-        public override void Execute()
+        public override void Update()
         {
             stateMachine.RunMachine();
         }

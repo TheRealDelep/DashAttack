@@ -402,6 +402,7 @@ MonoBehaviour:
   airControlAmount: 1
   jumpHeight: 5
   jumpDistance: 10
+  wallStickTime: 1
 --- !u!1 &1158414454
 GameObject:
   m_ObjectHideFlags: 0

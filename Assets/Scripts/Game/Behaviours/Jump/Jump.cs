@@ -10,12 +10,15 @@ namespace DashAttack.Game.Behaviours.Jump
 
         private bool IsGrounded => physicsObject.CurrentCollisions.Any(h => h.normal == Vector2.up);
 
+        public override bool IsExecuting => CurrentState != Rest;
+
         protected override void InitStateMachine()
         {
             base.InitStateMachine();
+
             stateMachine.AddState(Rest, onStateUpdate: OnRestUpdate);
             stateMachine.AddState(Rising, onStateEnter: OnRisingEnter, onStateUpdate: OnRisingUpdate);
-            stateMachine.AddState(Falling, onStateUpdate: OnFallingUpdate);
+            stateMachine.AddState(Falling, onStateEnter: OnFallingEnter, onStateUpdate: OnFallingUpdate);
 
             stateMachine.SubscribeAfterUpdate(AfterUpdate);
 
@@ -24,21 +27,29 @@ namespace DashAttack.Game.Behaviours.Jump
 
         void OnRestUpdate()
         {
-            if (input.Jump && IsGrounded)
+            if (input.JumpPressedThisFixedFrame && IsGrounded)
             {
                 stateMachine.TransitionTo(Rising);
             }
         }
 
         void OnRisingEnter()
-            => currentVelocity = data.JumpVelocity;
+            => currentVelocity = data.JumpVelocity + data.Gravity * Time.fixedDeltaTime;
 
         void OnRisingUpdate()
         {
             var hasCollisionUp = physicsObject.CurrentCollisions.Any(h => h.normal == Vector2.down);
-            if (hasCollisionUp || currentVelocity <= 0)
+            if (hasCollisionUp || currentVelocity <= 0 || !input.Jump)
             {
                 stateMachine.TransitionTo(Falling);
+            }
+        }
+
+        void OnFallingEnter()
+        {
+            if (currentVelocity > 0)
+            {
+                currentVelocity = 0;
             }
         }
 

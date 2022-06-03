@@ -2,6 +2,7 @@
 using DashAttack.Game.Behaviours.Fall;
 using DashAttack.Game.Behaviours.Jump;
 using DashAttack.Game.Behaviours.Run;
+using DashAttack.Game.Behaviours.WallStick;
 using DashAttack.Game.Models;
 using TheRealDelep.Physics.Interfaces;
 using UnityEngine;
@@ -16,8 +17,9 @@ namespace DashAttack.Game.Controllers
         private PlayerInputs inputs;
 
         private IBehaviour<IFallData, IFallInput> fall;
-        private IStateMachineBehaviour<IRunData, IRunInput, RunState> run;
-        private IStateMachineBehaviour<IJumpData, IJumpInput, JumpState> jump;
+        private IBehaviour<IRunData, IRunInput> run;
+        private IBehaviour<IJumpData, IJumpInput> jump;
+        private IBehaviour<IWallStickData, ICharacterInputs> wallSitck;
 
         private void Start()
         {
@@ -30,20 +32,28 @@ namespace DashAttack.Game.Controllers
             fall = new Fall();
             run = new Run();
             jump = new Jump();
+            wallSitck = new WallStick();
 
             fall.Init(physicsObject, player, inputs);
             run.Init(physicsObject, player, inputs);
             jump.Init(physicsObject, player, inputs);
+            wallSitck.Init(physicsObject, player, inputs);
         }
 
         private void FixedUpdate()
         {
-            run.Execute();
-            jump.Execute();
+            wallSitck.Update();
 
-            if (jump.CurrentState == JumpState.Rest)
+            if (!wallSitck.IsExecuting)
             {
-                fall.Execute();
+                run.Update();
+            }
+
+            jump.Update();
+
+            if (!jump.IsExecuting)
+            {
+                fall.Update();
             }
         }
     }

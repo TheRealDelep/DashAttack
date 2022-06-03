@@ -3,5 +3,6 @@
     public interface IJumpInput : ICharacterInputs
     {
         public bool Jump { get; }
+        public bool JumpPressedThisFixedFrame { get; }
     }
 }

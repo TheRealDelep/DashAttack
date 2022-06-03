@@ -1,12 +1,13 @@
 ﻿using DashAttack.Game.Behaviours.Fall;
 using DashAttack.Game.Behaviours.Jump;
 using DashAttack.Game.Behaviours.Run;
+using DashAttack.Game.Behaviours.WallStick;
 using System;
 using UnityEngine;
 
 namespace DashAttack.Game.Models
 {
-    public class Player : MonoBehaviour, IRunData, IFallData, IJumpData
+    public class Player : MonoBehaviour, IRunData, IFallData, IJumpData, IWallStickData
     {
         [SerializeField, Header("Run Data")]
         private float maxSpeed;
@@ -28,6 +29,9 @@ namespace DashAttack.Game.Models
 
         [SerializeField]
         private float jumpDistance;
+
+        [SerializeField]
+        private float wallStickTime;
 
         public float MaxSpeed
         {
@@ -71,6 +75,12 @@ namespace DashAttack.Game.Models
             private set => jumpDistance = Mathf.Clamp(value, 1, int.MaxValue);
         }
 
+        public float WallStickTime
+        {
+            get => wallStickTime;
+            set => wallStickTime = Mathf.Clamp(value, 0, int.MaxValue);
+        }
+
         public float JumpVelocity { get; private set; }
 
         public float Gravity { get; private set; }
@@ -85,6 +95,7 @@ namespace DashAttack.Game.Models
 
             JumpHeight = jumpHeight;
             JumpDistance = jumpDistance;
+            WallStickTime = wallStickTime;
 
             ComputeJumpVelocity();
         }

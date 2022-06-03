@@ -6,7 +6,9 @@ namespace DashAttack.Game.Behaviours.Fall
     {
         private float currentVelocity;
 
-        public override void Execute()
+        public override bool IsExecuting => true;
+
+        public override void Update()
         {
             if (!input.CanFall)
             {

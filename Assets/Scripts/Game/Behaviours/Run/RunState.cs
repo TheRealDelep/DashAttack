@@ -6,6 +6,6 @@
         Accelerating,
         Braking,
         Turning,
-        AtMaxSpeed
+        AtMaxSpeed,
     }
 }
