@@ -402,7 +402,9 @@ MonoBehaviour:
   airControlAmount: 1
   jumpHeight: 5
   jumpDistance: 10
-  wallStickTime: 1
+  wallStickTime: 0.03
+  wallSlideMultiplier: 0.36
+  wallClimbMultiplier: 0.7
 --- !u!1 &1158414454
 GameObject:
   m_ObjectHideFlags: 0

@@ -26,6 +26,7 @@ namespace TheRealDelep.Physics.Concretes
 
         private void UpdatePosition()
         {
+            Debug.Log("PhysicsObject: " + Velocity.y);
             var hits = collisionDetector.GetNearestCollisions(Velocity);
             foreach (var hit in hits)
             {
@@ -34,6 +35,8 @@ namespace TheRealDelep.Physics.Concretes
 
             rb.MovePosition(rb.position + Velocity);
             UpdateCollisions(hits);
+
+            //Debug.Log(CurrentCollisions.Where(h => h.normal == Vector2.left).Count());
 
             Velocity = Vector2.zero;
         }

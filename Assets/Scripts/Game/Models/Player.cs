@@ -33,6 +33,12 @@ namespace DashAttack.Game.Models
         [SerializeField]
         private float wallStickTime;
 
+        [SerializeField]
+        private float wallSlideMultiplier;
+
+        [SerializeField]
+        private float wallClimbMultiplier;
+
         public float MaxSpeed
         {
             get => maxSpeed;
@@ -81,6 +87,18 @@ namespace DashAttack.Game.Models
             set => wallStickTime = Mathf.Clamp(value, 0, int.MaxValue);
         }
 
+        public float WallSlideMultiplier
+        {
+            get => wallSlideMultiplier;
+            set => wallSlideMultiplier = Mathf.Clamp(value, 0, 1);
+        }
+
+        public float WallClimbMultiplier
+        {
+            get => wallClimbMultiplier;
+            set => wallClimbMultiplier = Mathf.Clamp(value, 0, 1);
+        }
+
         public float JumpVelocity { get; private set; }
 
         public float Gravity { get; private set; }
@@ -96,6 +114,8 @@ namespace DashAttack.Game.Models
             JumpHeight = jumpHeight;
             JumpDistance = jumpDistance;
             WallStickTime = wallStickTime;
+            WallSlideMultiplier = wallSlideMultiplier;
+            WallClimbMultiplier = wallClimbMultiplier;
 
             ComputeJumpVelocity();
         }

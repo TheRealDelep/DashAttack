@@ -8,9 +8,33 @@ namespace DashAttack.Game.Behaviours.Jump
     {
         private float currentVelocity;
 
-        private bool IsGrounded => physicsObject.CurrentCollisions.Any(h => h.normal == Vector2.up);
+        private bool IsGrounded
+            => physicsObject.CurrentCollisions.Any(h => h.normal == Vector2.up);
 
         public override bool IsExecuting => CurrentState != Rest;
+
+        private bool hasCollisionOnSide
+            => physicsObject.CurrentCollisions.Any(h
+                => h.normal == Vector2.left
+                || h.normal == Vector2.right);
+
+        private float WallMultiplier
+        {
+            get
+            {
+                if (data.WallSlideMultiplier == 1 && data.WallClimbMultiplier == 1 || !hasCollisionOnSide)
+                {
+                    return 1;
+                }
+
+                return CurrentState switch
+                {
+                    Rising => data.WallClimbMultiplier,
+                    Falling => data.WallSlideMultiplier,
+                    _ => 1
+                };
+            }
+        }
 
         protected override void InitStateMachine()
         {
@@ -38,6 +62,7 @@ namespace DashAttack.Game.Behaviours.Jump
 
         void OnRisingUpdate()
         {
+            currentVelocity -= data.Gravity * WallMultiplier * Time.fixedDeltaTime;
             var hasCollisionUp = physicsObject.CurrentCollisions.Any(h => h.normal == Vector2.down);
             if (hasCollisionUp || currentVelocity <= 0 || !input.Jump)
             {
@@ -47,10 +72,7 @@ namespace DashAttack.Game.Behaviours.Jump
 
         void OnFallingEnter()
         {
-            if (currentVelocity > 0)
-            {
-                currentVelocity = 0;
-            }
+            currentVelocity -= data.Gravity * WallMultiplier * Time.fixedDeltaTime;
         }
 
         void OnFallingUpdate()
@@ -59,15 +81,18 @@ namespace DashAttack.Game.Behaviours.Jump
             {
                 stateMachine.TransitionTo(Rest);
             }
+
+            currentVelocity -= data.Gravity * WallMultiplier * Time.fixedDeltaTime;
         }
 
         void AfterUpdate()
         {
-            if (CurrentState != Rest)
+            if (CurrentState == Rest)
             {
-                currentVelocity -= data.Gravity * Time.fixedDeltaTime;
-                physicsObject.Move(0, currentVelocity * Time.fixedDeltaTime);
+                return;
             }
+
+            physicsObject.Move(0, currentVelocity * Time.fixedDeltaTime);
         }
     }
 }

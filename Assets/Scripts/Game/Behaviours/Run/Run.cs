@@ -53,7 +53,7 @@ namespace DashAttack.Game.Behaviours.Run
 
         private void BeforeStateUpdate()
         {
-            if (physicsObject.CurrentCollisions.Any(h => h.normal.x == -Mathf.Sign(CurrentVelocity)))
+            if (physicsObject.CurrentCollisions.Any(h => h.normal == Vector2.left || h.normal == Vector2.right))
             {
                 CurrentVelocity = 0;
             }

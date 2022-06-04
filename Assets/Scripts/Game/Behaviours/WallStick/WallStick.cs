@@ -12,25 +12,32 @@ namespace DashAttack.Game.Behaviours.WallStick
         private bool wallSticked;
 
         public override bool IsExecuting => wallSticked;
+        private float wallDirection;
 
         public override void Init(IPhysicsObject physicsObject, IWallStickData data, ICharacterInputs input)
         {
             base.Init(physicsObject, data, input);
             this.physicsObject.OnCollisionEnter += hits =>
             {
-                if (hits.Any(h => h.normal == Vector2.right || h.normal == Vector2.left) &&
-                    !hits.Any(h => h.normal == Vector2.up))
+                var collisionOnSide = hits.FirstOrDefault(h
+                    => h.normal == Vector2.right || h.normal == Vector2.left);
+
+                if (collisionOnSide && !physicsObject.CurrentCollisions.Any(h => h.normal == Vector2.up))
                 {
                     wallSticked = true;
+                    wallDirection = -collisionOnSide.normal.x;
                 }
             };
 
-            this.physicsObject.OnCollisionExit += hits =>
+            this.physicsObject.OnCollisionExit += _ =>
             {
-                if (hits.Any(h => h.normal == Vector2.up) &&
-                    physicsObject.CurrentCollisions.Any(h => h.normal == Vector2.right || h.normal == Vector2.left))
+                var collisionOnSide = physicsObject.CurrentCollisions.FirstOrDefault(h
+                    => h.normal == Vector2.right || h.normal == Vector2.left);
+
+                if (collisionOnSide && physicsObject.CurrentCollisions.All(h => h.normal != Vector2.up))
                 {
                     wallSticked = true;
+                    wallDirection = -collisionOnSide.normal.x;
                 }
             };
         }
@@ -44,7 +51,10 @@ namespace DashAttack.Game.Behaviours.WallStick
                 {
                     wallSticked = false;
                     elapsedTimeOnWall = 0;
+                    return;
                 }
+
+                physicsObject.Move(wallDirection, 0);
             }
         }
     }
