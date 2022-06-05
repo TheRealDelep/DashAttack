@@ -2,6 +2,7 @@
 using DashAttack.Game.Behaviours.Fall;
 using DashAttack.Game.Behaviours.Jump;
 using DashAttack.Game.Behaviours.Run;
+using DashAttack.Game.Behaviours.WallJump;
 using DashAttack.Game.Behaviours.WallStick;
 using DashAttack.Game.Models;
 using TheRealDelep.Physics.Interfaces;
@@ -20,6 +21,11 @@ namespace DashAttack.Game.Controllers
         private IBehaviour<IRunData, IRunInput> run;
         private IBehaviour<IJumpData, IJumpInput> jump;
         private IBehaviour<IWallStickData, ICharacterInputs> wallSitck;
+        private IBehaviour<IWallJumpData, IWallJumpInput> wallJump;
+
+        private bool enableFall => !jump.IsExecuting && !wallJump.IsExecuting;
+        private bool enableRun => !wallSitck.IsExecuting && !wallJump.IsExecuting;
+        private bool enableJump => !wallJump.IsExecuting;
 
         private void Start()
         {
@@ -33,28 +39,43 @@ namespace DashAttack.Game.Controllers
             run = new Run();
             jump = new Jump();
             wallSitck = new WallStick();
+            wallJump = new WallJump();
 
             fall.Init(physicsObject, player, inputs);
             run.Init(physicsObject, player, inputs);
             jump.Init(physicsObject, player, inputs);
             wallSitck.Init(physicsObject, player, inputs);
+            wallJump.Init(physicsObject, player, inputs);
         }
 
         private void FixedUpdate()
         {
             wallSitck.Update();
 
-            if (!wallSitck.IsExecuting)
+            if (enableRun)
             {
                 run.Update();
             }
 
-            jump.Update();
+            if (enableJump)
+            {
+                jump.Update();
+            }
+            else
+            {
+                jump.Reset();
+            }
 
-            if (!jump.IsExecuting)
+            if (enableFall)
             {
                 fall.Update();
             }
+            else
+            {
+                fall.Reset();
+            }
+
+            wallJump.Update();
         }
     }
 

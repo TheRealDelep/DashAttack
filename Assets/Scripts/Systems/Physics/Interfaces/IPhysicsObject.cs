@@ -14,6 +14,8 @@ namespace TheRealDelep.Physics.Interfaces
 
         Vector2 Position { get; }
 
+        void Move(Vector2 movement);
+
         void Move(float x, float y);
     }
 }

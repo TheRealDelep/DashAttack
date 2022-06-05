@@ -18,6 +18,8 @@ namespace DashAttack.Game.Behaviours.Jump
                 => h.normal == Vector2.left
                 || h.normal == Vector2.right);
 
+        public override void Reset() => stateMachine.TransitionTo(Rest);
+
         private float WallMultiplier
         {
             get
@@ -40,7 +42,7 @@ namespace DashAttack.Game.Behaviours.Jump
         {
             base.InitStateMachine();
 
-            stateMachine.AddState(Rest, onStateUpdate: OnRestUpdate);
+            stateMachine.AddState(Rest, onStateEnter: OnRestEnter, onStateUpdate: OnRestUpdate);
             stateMachine.AddState(Rising, onStateEnter: OnRisingEnter, onStateUpdate: OnRisingUpdate);
             stateMachine.AddState(Falling, onStateEnter: OnFallingEnter, onStateUpdate: OnFallingUpdate);
 
@@ -49,7 +51,10 @@ namespace DashAttack.Game.Behaviours.Jump
             stateMachine.Start(Rest);
         }
 
-        void OnRestUpdate()
+        private void OnRestEnter()
+            => currentVelocity = 0;
+
+        private void OnRestUpdate()
         {
             if (input.JumpPressedThisFixedFrame && IsGrounded)
             {
@@ -57,10 +62,10 @@ namespace DashAttack.Game.Behaviours.Jump
             }
         }
 
-        void OnRisingEnter()
+        private void OnRisingEnter()
             => currentVelocity = data.JumpVelocity + data.Gravity * Time.fixedDeltaTime;
 
-        void OnRisingUpdate()
+        private void OnRisingUpdate()
         {
             currentVelocity -= data.Gravity * WallMultiplier * Time.fixedDeltaTime;
             var hasCollisionUp = physicsObject.CurrentCollisions.Any(h => h.normal == Vector2.down);
@@ -70,12 +75,12 @@ namespace DashAttack.Game.Behaviours.Jump
             }
         }
 
-        void OnFallingEnter()
+        private void OnFallingEnter()
         {
             currentVelocity -= data.Gravity * WallMultiplier * Time.fixedDeltaTime;
         }
 
-        void OnFallingUpdate()
+        private void OnFallingUpdate()
         {
             if (IsGrounded)
             {
@@ -85,7 +90,7 @@ namespace DashAttack.Game.Behaviours.Jump
             currentVelocity -= data.Gravity * WallMultiplier * Time.fixedDeltaTime;
         }
 
-        void AfterUpdate()
+        private void AfterUpdate()
         {
             if (CurrentState == Rest)
             {

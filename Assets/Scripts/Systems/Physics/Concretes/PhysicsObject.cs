@@ -15,18 +15,21 @@ namespace TheRealDelep.Physics.Concretes
         private Rigidbody2D rb;
         private ICollisionDetector collisionDetector;
 
-        public Vector2 Velocity { get; private set; } = Vector2.zero;
+        public Vector2 Velocity { get; private set; }
 
         public IEnumerable<RaycastHit2D> CurrentCollisions { get; private set; } = Enumerable.Empty<RaycastHit2D>();
 
-        public Vector2 Position => rb.velocity;
+        public Vector2 Position
+            => rb.velocity;
+
+        public void Move(Vector2 movement)
+            => Velocity += movement;
 
         public void Move(float x, float y)
-            => Velocity += new Vector2(x, y);
+            => Move(new(x, y));
 
         private void UpdatePosition()
         {
-            Debug.Log("PhysicsObject: " + Velocity.y);
             var hits = collisionDetector.GetNearestCollisions(Velocity);
             foreach (var hit in hits)
             {
@@ -35,8 +38,6 @@ namespace TheRealDelep.Physics.Concretes
 
             rb.MovePosition(rb.position + Velocity);
             UpdateCollisions(hits);
-
-            //Debug.Log(CurrentCollisions.Where(h => h.normal == Vector2.left).Count());
 
             Velocity = Vector2.zero;
         }
