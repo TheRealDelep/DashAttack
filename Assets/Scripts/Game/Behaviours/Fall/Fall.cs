@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 
 namespace DashAttack.Game.Behaviours.Fall
 {
@@ -10,7 +11,7 @@ namespace DashAttack.Game.Behaviours.Fall
 
         public override void Update()
         {
-            if (!input.CanFall)
+            if (physicsObject.CurrentCollisions.Any(h => h.normal == Vector2.up))
             {
                 currentVelocity = 0;
             }

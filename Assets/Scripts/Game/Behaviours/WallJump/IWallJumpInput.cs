@@ -1,6 +1,6 @@
 ﻿namespace DashAttack.Game.Behaviours.WallJump
 {
-    public interface IWallJumpInput : ICharacterInputs
+    public interface IWallJumpInput : IBehaviourContext
     {
         bool JumpPressedThisFixedFrame { get; }
     }

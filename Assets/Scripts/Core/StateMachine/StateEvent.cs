@@ -1,4 +1,4 @@
-﻿namespace TheRealDelep.StateMachine
+﻿namespace DashAttack.Core.StateMachine
 {
     public enum StateEvent
     {

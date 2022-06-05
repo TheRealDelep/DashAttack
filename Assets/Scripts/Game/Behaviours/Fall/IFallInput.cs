@@ -1,7 +1,6 @@
 ﻿namespace DashAttack.Game.Behaviours.Fall
 {
-    public interface IFallInput : ICharacterInputs
+    public interface IFallInput : IBehaviourContext
     {
-        bool CanFall { get; }
     }
 }

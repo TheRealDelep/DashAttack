@@ -8,17 +8,15 @@ namespace DashAttack.Game.Behaviours.Jump
     {
         private float currentVelocity;
 
-        private bool IsGrounded
-            => physicsObject.CurrentCollisions.Any(h => h.normal == Vector2.up);
-
         public override bool IsExecuting => CurrentState != Rest;
+
+        private bool IsGrounded
+                    => physicsObject.CurrentCollisions.Any(h => h.normal == Vector2.up);
 
         private bool hasCollisionOnSide
             => physicsObject.CurrentCollisions.Any(h
                 => h.normal == Vector2.left
                 || h.normal == Vector2.right);
-
-        public override void Reset() => stateMachine.TransitionTo(Rest);
 
         private float WallMultiplier
         {
@@ -38,6 +36,8 @@ namespace DashAttack.Game.Behaviours.Jump
             }
         }
 
+        public override void Reset() => stateMachine.TransitionTo(Rest);
+
         protected override void InitStateMachine()
         {
             base.InitStateMachine();
@@ -49,6 +49,16 @@ namespace DashAttack.Game.Behaviours.Jump
             stateMachine.SubscribeAfterUpdate(AfterUpdate);
 
             stateMachine.Start(Rest);
+        }
+
+        private void AfterUpdate()
+        {
+            if (CurrentState == Rest)
+            {
+                return;
+            }
+
+            physicsObject.Move(0, currentVelocity * Time.fixedDeltaTime);
         }
 
         private void OnRestEnter()
@@ -88,16 +98,6 @@ namespace DashAttack.Game.Behaviours.Jump
             }
 
             currentVelocity -= data.Gravity * WallMultiplier * Time.fixedDeltaTime;
-        }
-
-        private void AfterUpdate()
-        {
-            if (CurrentState == Rest)
-            {
-                return;
-            }
-
-            physicsObject.Move(0, currentVelocity * Time.fixedDeltaTime);
         }
     }
 }

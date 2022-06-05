@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace TheRealDelep.Physics.Interfaces
+namespace DashAttack.Core.Physics.Interfaces
 {
     public interface ICollisionDetector
     {

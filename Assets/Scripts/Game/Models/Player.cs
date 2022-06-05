@@ -3,7 +3,6 @@ using DashAttack.Game.Behaviours.Jump;
 using DashAttack.Game.Behaviours.Run;
 using DashAttack.Game.Behaviours.WallJump;
 using DashAttack.Game.Behaviours.WallStick;
-using System;
 using UnityEngine;
 
 namespace DashAttack.Game.Models
@@ -96,8 +95,11 @@ namespace DashAttack.Game.Models
         }
 
         public float JumpVelocity { get; private set; }
+
         public float Gravity { get; private set; }
+
         public Vector2 ImpulseVelocity { get; private set; }
+
         public Vector2 Deceleration { get; private set; }
 
         private void OnValidate()

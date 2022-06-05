@@ -1,7 +1,5 @@
 ﻿using System.Linq;
-using TheRealDelep.Physics.Interfaces;
 using UnityEngine;
-using static DashAttack.Game.Behaviours.WallJump.WallJumpState;
 
 namespace DashAttack.Game.Behaviours.WallJump
 {
@@ -14,6 +12,7 @@ namespace DashAttack.Game.Behaviours.WallJump
         public override bool IsExecuting => isWallJumping;
 
         private bool IsOnWall => physicsObject.CurrentCollisions.Any(h => h.normal == Vector2.left || h.normal == Vector2.right);
+
         private bool isGrounded => physicsObject.CurrentCollisions.Any(h => h.normal == Vector2.up);
 
         public override void Reset()

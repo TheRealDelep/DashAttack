@@ -1,14 +1,15 @@
 ﻿using System;
 using UnityEngine;
 
-namespace TheRealDelep.Physics
+namespace DashAttack.Core.Physics
 {
     [DefaultExecutionOrder(1_000_000)]
     public class PhysicsManager : MonoBehaviour
     {
-        public static PhysicsManager Instance { get; private set; }
-
         public static event Action EndOfFixedFrame;
+        public static event Action StartOfFixedFrame;
+
+        public static PhysicsManager Instance { get; private set; }
 
         private void Awake()
         {

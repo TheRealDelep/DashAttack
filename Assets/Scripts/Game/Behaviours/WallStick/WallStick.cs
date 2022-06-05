@@ -1,20 +1,18 @@
-﻿using System.Linq;
-using TheRealDelep.Physics.Interfaces;
+﻿using DashAttack.Core.Physics.Interfaces;
+using System.Linq;
 using UnityEngine;
 
 namespace DashAttack.Game.Behaviours.WallStick
 {
-
-    public class WallStick : BaseBehaviour<IWallStickData, ICharacterInputs>
+    public class WallStick : BaseBehaviour<IWallStickData, IBehaviourContext>
     {
         private float elapsedTimeOnWall;
-
         private bool wallSticked;
-
-        public override bool IsExecuting => wallSticked;
         private float wallDirection;
 
-        public override void Init(IPhysicsObject physicsObject, IWallStickData data, ICharacterInputs input)
+        public override bool IsExecuting => wallSticked;
+
+        public override void Init(IPhysicsObject physicsObject, IWallStickData data, IBehaviourContext input)
         {
             base.Init(physicsObject, data, input);
             this.physicsObject.OnCollisionEnter += hits =>

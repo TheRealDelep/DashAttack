@@ -1,30 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using TheRealDelep.Physics.Interfaces;
+using DashAttack.Core.Physics.Interfaces;
 using UnityEngine;
 
-namespace TheRealDelep.Physics.Concretes
+namespace DashAttack.Core.Physics.Concretes
 {
     [RequireComponent(typeof(BoxCollider2D))]
     public class BoxCollisionDetector : MonoBehaviour, ICollisionDetector
     {
         private const float skinWidth = .015f;
 
-        [SerializeField]
-        private int nbRays;
+        [SerializeField] private int nbRays;
 
-        [Header("Debug"), SerializeField]
-        private bool drawDebugRays;
-
-        [SerializeField]
-        private Color debugRayColor;
+        [Header("Debug")]
+        [SerializeField] private bool drawDebugRays;
+        [SerializeField] private Color debugRayColor;
 
         private BoxCollider2D boxCollider;
         private RaycastHit2D[] hitBuffer;
 
-
-        public int NbRays
+        private int NbRays
         {
             get => nbRays;
             set

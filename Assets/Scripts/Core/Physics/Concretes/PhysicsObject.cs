@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using TheRealDelep.Physics.Interfaces;
+using DashAttack.Core.Physics.Interfaces;
 using UnityEngine;
 
-namespace TheRealDelep.Physics.Concretes
+namespace DashAttack.Core.Physics.Concretes
 {
     [RequireComponent(typeof(Rigidbody2D))]
     public class PhysicsObject : MonoBehaviour, IPhysicsObject

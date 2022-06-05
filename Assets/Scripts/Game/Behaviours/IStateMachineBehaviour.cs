@@ -1,10 +1,10 @@
 ﻿using System;
-using TheRealDelep.StateMachine;
+using DashAttack.Core.StateMachine;
 
 namespace DashAttack.Game.Behaviours
 {
     public interface IStateMachineBehaviour<TData, TInput, TState> : IBehaviour<TData, TInput>
-        where TInput : ICharacterInputs
+        where TInput : IBehaviourContext
         where TState : Enum
     {
         TState CurrentState { get; }

@@ -1,7 +1,7 @@
-﻿namespace TheRealDelep.StateMachine
-{
-    using System;
+﻿using System;
 
+namespace DashAttack.Core.StateMachine
+{
     public class State<TStateEnum>
         where TStateEnum : Enum
     {

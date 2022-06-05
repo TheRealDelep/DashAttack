@@ -1,9 +1,9 @@
-﻿using TheRealDelep.Physics.Interfaces;
+﻿using DashAttack.Core.Physics.Interfaces;
 
 namespace DashAttack.Game.Behaviours
 {
     public abstract class BaseBehaviour<TData, TInput> : IBehaviour<TData, TInput>
-        where TInput : ICharacterInputs
+        where TInput : IBehaviourContext
     {
         protected IPhysicsObject physicsObject;
         protected TData data;

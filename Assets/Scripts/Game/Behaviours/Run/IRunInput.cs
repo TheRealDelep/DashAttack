@@ -1,6 +1,6 @@
 ﻿namespace DashAttack.Game.Behaviours.Run
 {
-    public interface IRunInput : ICharacterInputs
+    public interface IRunInput : IBehaviourContext
     {
         float RunDirection { get; }
     }

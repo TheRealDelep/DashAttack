@@ -14,6 +14,7 @@ namespace DashAttack.Game.Behaviours.Run
         private bool isTurningFrame;
 
         public override RunState CurrentState => stateMachine.CurrentState;
+
         public override bool IsExecuting => CurrentState != Rest;
 
         private float CurrentVelocity
@@ -26,14 +27,13 @@ namespace DashAttack.Game.Behaviours.Run
             }
         }
 
-        public override void Reset()
-            => CurrentVelocity = 0;
-
         private float AerialMod
             => physicsObject.CurrentCollisions.Any(h => h.normal == Vector2.up)
              ? data.AirControlAmount
              : 1;
 
+        public override void Reset()
+            => CurrentVelocity = 0;
 
         protected override void InitStateMachine()
         {

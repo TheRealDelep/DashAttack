@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using static TheRealDelep.StateMachine.StateEvent;
+using static DashAttack.Core.StateMachine.StateEvent;
 
-namespace TheRealDelep.StateMachine
+namespace DashAttack.Core.StateMachine
 {
-
     public class StateMachine<TStateEnum>
         where TStateEnum : Enum
     {
+        private event Action afterStateUpdate;
+        private event Action beforeStateUpdate;
+
         private Dictionary<TStateEnum, State<TStateEnum>> states = new();
 
-        private event Action beforeStateUpdate;
-        private event Action afterStateUpdate;
-
         public TStateEnum CurrentState { get; private set; }
+
         public TStateEnum PreviousState { get; private set; }
 
         public void AddState(TStateEnum stateEnum, Action onStateEnter = null, Action onStateLeave = null, Action onStateUpdate = null)
@@ -33,13 +33,6 @@ namespace TheRealDelep.StateMachine
             states.Add(stateEnum, state);
         }
 
-        public void RunMachine()
-        {
-            beforeStateUpdate?.Invoke();
-            states[CurrentState].OnStateUpdate();
-            afterStateUpdate?.Invoke();
-        }
-
         public void Start(TStateEnum entryState)
         {
             if (!states.ContainsKey(entryState))
@@ -48,6 +41,13 @@ namespace TheRealDelep.StateMachine
             }
 
             CurrentState = entryState;
+        }
+
+        public void RunMachine()
+        {
+            beforeStateUpdate?.Invoke();
+            states[CurrentState].OnStateUpdate();
+            afterStateUpdate?.Invoke();
         }
 
         public void TransitionTo(TStateEnum nextState)
@@ -79,10 +79,10 @@ namespace TheRealDelep.StateMachine
             }
         }
 
-        public void SubscribeBeforeUpdate(Action action)
-            => beforeStateUpdate += action;
-
         public void SubscribeAfterUpdate(Action action)
             => afterStateUpdate += action;
+
+        public void SubscribeBeforeUpdate(Action action)
+            => beforeStateUpdate += action;
     }
 }
