@@ -17,8 +17,6 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
     {
         public const string SmartNSVersionNumber = "2.0.2";
 
-
-
         // TODO: Do we need something else for Mac?
         private static string PathSeparator = "/";
 
@@ -41,7 +39,6 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
                     return;
                 }
 
-
                 path = path.Replace(".meta", "");
                 path = path.Trim();
                 int index = path.LastIndexOf(".");
@@ -55,7 +52,6 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
                 _shouldWriteDebugLogInfo = enableDebugLogging;
 
                 ProcessNamespaceForScriptAtPath(path);
-
             }
             catch (Exception ex)
             {
@@ -64,12 +60,12 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
             }
         }
 
-
-        #endregion
-
+        #endregion Asset Creation
 
         #region Asset Moved
+
         private static HashSet<string> _currentlyMovingAssets = new HashSet<string>();
+
         public static AssetMoveResult OnWillMoveAsset(string sourcePath, string destinationPath)
         {
             var assetMoveResult = AssetMoveResult.DidNotMove;
@@ -108,7 +104,6 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
                                 // We can move this. So go ahead.
                                 AssetDatabase.MoveAsset(sourcePath, destinationPath);
 
-
                                 // Now post-process the moved script to clean up its namespace.
                                 ProcessNamespaceForScriptAtPath(destinationPath);
 
@@ -131,9 +126,7 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
             return assetMoveResult;
         }
 
-        #endregion
-
-
+        #endregion Asset Moved
 
         private static void ProcessNamespaceForScriptAtPath(string path, HashSet<string> directoryIgnoreList = null)
         {
@@ -153,12 +146,10 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
             var directoryDenyListSettingsValue = smartNSSettings.FindProperty("m_DirectoryIgnoreList").stringValue;
             var enableDebugLogging = smartNSSettings.FindProperty("m_EnableDebugLogging").boolValue;
 
-
-
             /*
              * This has been commented out. It was causing errors when moving files. I'm not sure why yet, but
              * moving a file in this was would always produce a "File couldn't be read!" error.
-             * 
+             *
             // If this script was created directly under the Assets folder, and the settings tell us a default script location
             // (other than "Assets") move it there.
             if (!string.IsNullOrWhiteSpace(defaultScriptCreationDirectorySettingsValue))
@@ -203,7 +194,6 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
             }
             */
 
-
             UpdateAssetNamespace(path,
                 scriptRootSettingsValue,
                 prefixSettingsValue,
@@ -213,7 +203,6 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
                 directoryDenyListSettingsValue,
                 enableDebugLogging,
                 directoryIgnoreList);
-
 
             // Without this, the file won't update in Unity, and won't look right.
             AssetDatabase.ImportAsset(path);
@@ -229,7 +218,6 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
             bool enableDebugLogging,
             HashSet<string> directoryIgnoreList = null)
         {
-
             _shouldWriteDebugLogInfo = enableDebugLogging;
 
             WriteDebug(string.Format("Acting on new C# file: {0}", assetPath));
@@ -253,7 +241,6 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
                 }
             }
 
-
             // Generate the namespace.
             string namespaceValue = GetNamespaceValue(assetPath, scriptRootSettingsValue, prefixSettingsValue, universalNamespaceSettingsValue);
             if (namespaceValue == null)
@@ -262,17 +249,15 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
                 return;
             }
 
-            // We try to keep line endings consistent. Detect the file's current line endings, and 
+            // We try to keep line endings consistent. Detect the file's current line endings, and
             // from that, determine which kind of line ending we should use.
             var lineEnding = DetectLineEndings(fullFilePath);
-
 
             // Read the file contents, so we can insert the namespace line, and indent other lines under it.
             // Note that we read the full file contents so we can avoid problems with leading non-breaking zero-width
             // spaces, and so we can detect whether the file ends with a linebreak.
             string rawFileContents = System.IO.File.ReadAllText(fullFilePath);
             string[] rawLines = rawFileContents.Split(new[] { lineEnding }, StringSplitOptions.None);
-
 
             // I don't know why there might be zero lines in the file, but we don't do anything if that's the case.
             if (rawLines.Length == 0)
@@ -281,19 +266,17 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
                 return;
             }
 
-
             var modifiedLines = new List<string>();
 
             // Determining exactly where to insert the namespace is a little tricky. A user could have modified the
-            // default template in any number of ways. And now that we're doing bulk correction, we could end up with 
+            // default template in any number of ways. And now that we're doing bulk correction, we could end up with
             // any weird formatting. The file may or may not contain a namespace declaration already.
-            // Namespaces can even span multiple lines. So our approach is to search the file until 
+            // Namespaces can even span multiple lines. So our approach is to search the file until
             // we find a line starting with "\w*namespace ", and assume that's the start of the namespace declaration.
-            // If we don't find an existing namespace, we use a (hopefully) safest approach of assuming that all 
+            // If we don't find an existing namespace, we use a (hopefully) safest approach of assuming that all
             // 'using' statements come first, and that the namespace declaration will appear after the last using statement.
-            // If we DO find a namespace declaration, we will remove is so that we can add a new one at that position. 
+            // If we DO find a namespace declaration, we will remove is so that we can add a new one at that position.
             // Removing the existing namespace has a bit of complexity, though, to make sure we remove all of it, and not too much.
-
 
             bool hasExistingNamespace = false;
             for (int rawLineIndex = 0; rawLineIndex < rawLines.Length; rawLineIndex++)
@@ -305,8 +288,7 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
 
                     WriteDebug(string.Format("Existing namespace found on line index {0}", rawLineIndex));
 
-
-                    // We found the line on which the namespace begins. We need to remove everything from the start of "namespace" right up 
+                    // We found the line on which the namespace begins. We need to remove everything from the start of "namespace" right up
                     // until we find the opening curly brace. This might go over many lines, with any amount of other content in between.
                     // This won't handle really ridiculous cases like:
                     //     namespace A.B
@@ -318,8 +300,8 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
                         // Keep looking until we find the curly brace, or we EOF.
                         if (line.Contains("{"))
                         {
-                            // We've found the curly brace. Remove everything leading up to it, 
-                            // then add the namespace. As an optimization against unnecessary edits, if the curly 
+                            // We've found the curly brace. Remove everything leading up to it,
+                            // then add the namespace. As an optimization against unnecessary edits, if the curly
                             // brace starts a line, then we leave it on its own line. Otherwise, we concatenate it with the namespace.
                             var indexOfCurlyBrace = line.IndexOf('{');
                             var curlyBraceOnward = line.Substring(indexOfCurlyBrace);
@@ -336,7 +318,7 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
                         }
                         else
                         {
-                            // This line doesn't contains 
+                            // This line doesn't contains
                             rawLineIndex++;
                             line = rawLines[rawLineIndex];
                         }
@@ -368,7 +350,6 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
                 modifiedLines.Insert(lastUsingLineIndex + 1, "");
                 modifiedLines.Insert(lastUsingLineIndex + 2, string.Format("namespace {0} {{", namespaceValue));
 
-
                 // Indent all lines in between.
                 for (var i = lastUsingLineIndex + 3; i < modifiedLines.Count; i++)
                 {
@@ -378,14 +359,12 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
                     modifiedLines[i] = string.Format("{0}{1}", prefix, modifiedLines[i]);
                 }
 
-
                 // Add the closing brace
                 modifiedLines.Add("}");
             }
 
             // Combine the modified lines into a single string.
             var newFileContents = string.Join(lineEnding, modifiedLines.ToArray());
-
 
             // There were cases where final line endings were being stripped by out splitting into an array of strings.
             // So, if the final ended with a line ending, ensure it still does.
@@ -400,7 +379,7 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
             // Similarly, if the file began with "\ufeff", ensure it still does.
             if (rawFileContents.StartsWith(ByteOrderMarkUtf8))
             {
-                // This is weird. If I test whether newFileContents already starts with a BOM, 
+                // This is weird. If I test whether newFileContents already starts with a BOM,
                 // it tells me it does. But if I write the string as-is, the resulting file won't start
                 // with a BOM. So I always need to add the BOM, even if it already has one.
                 // However, if I add two BOMs, then it clear ends up with two BOMs. So, I don't see why
@@ -408,11 +387,7 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
                 newFileContents = ByteOrderMarkUtf8 + newFileContents;
             }
 
-
-
             System.IO.File.WriteAllText(fullFilePath, newFileContents);
-
-
         }
 
         private static string DetectLineEndings(string filePath)
@@ -421,7 +396,7 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
             //  - \r = CR
             //  - \n = LF
             //  - \r\n = CR LF
-            // 
+            //
             // Ideally we'll remain consistent in the line endings we use when composing the file. So, we
             // inspect the raw file data here to determine which line endings are being used.
 
@@ -450,11 +425,9 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
             }
         }
 
-
         public static string GetNamespaceValue(string path, string scriptRootValue, string prefixValue, string universalNamespaceValue)
         {
             string namespaceValue = null;
-
 
             if (string.IsNullOrEmpty(universalNamespaceValue) || string.IsNullOrEmpty(universalNamespaceValue.Trim()))
             {
@@ -463,7 +436,7 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
 
                 if (scriptRootValue.Trim().Length > 0)
                 {
-                    // Old Version: Used to require an exact match between the scriptRootValue and the path. 
+                    // Old Version: Used to require an exact match between the scriptRootValue and the path.
                     // That had a defect where using a ScriptRoot of "Assets/ABC", then created a script in "Assets"
                     // would not strip off the "Assets" from the start of the namespace.
                     /*
@@ -476,12 +449,12 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
                     */
 
                     // New Version: Remove as much of the ScriptRoot as exists in the path, as long as the elements line up
-                    // exactly. 
+                    // exactly.
                     foreach (var scriptRootPathPart in Regex.Split(scriptRootValue.Trim(), PathSeparator))
                     {
                         var toTrim = scriptRootPathPart.Trim();
 
-                        // We need to match exactly on each element in the path. We used to just check for StartsWith, but if we 
+                        // We need to match exactly on each element in the path. We used to just check for StartsWith, but if we
                         // had a prefix of "A" when the path was "ABC", we used to strip the A off the ABC, which was wrong.
                         if (namespaceValue == toTrim || namespaceValue.StartsWith(toTrim + PathSeparator))
                         {
@@ -495,15 +468,12 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
                             }
                         }
                     }
-
                 }
-
 
                 var rawPathParts = namespaceValue.Split(PathSeparator.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
 
                 // Ignore the last "part", as that's the file name.
                 var namespaceParts = rawPathParts.Take(rawPathParts.Count() - 1).ToArray();
-
 
                 // Namespace identifiers can't start with a number. So we prefix those with underscores
                 // if they exist.
@@ -516,7 +486,6 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
                     }
                 }
 
-
                 namespaceValue = string.Join("/", namespaceParts);
 
                 // Trim any spaces.
@@ -527,9 +496,6 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
                 namespaceValue = namespaceValue.Replace("/", ".");
 
                 WriteDebug(string.Format("Script Root = {0}", scriptRootValue));
-
-
-
 
                 if (namespaceValue.StartsWith("."))
                 {
@@ -550,11 +516,9 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
                             prefixValue.EndsWith(".") ? "" : ".",
                             namespaceValue);
                     }
-
                 }
 
                 WriteDebug(string.Format("Using smart namespace: '{0}'", namespaceValue));
-
             }
             else
             {
@@ -624,6 +588,6 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
             }
         }
 
-        #endregion
+        #endregion Debug
     }
 }

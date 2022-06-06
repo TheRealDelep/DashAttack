@@ -10,7 +10,7 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
     public class SmartNSBulkConversionWindow : EditorWindow
     {
         [MenuItem("Window/SmartNS/Bulk Namespace Conversion...")]
-        static void Init()
+        private static void Init()
         {
             // Get existing open window or if none, make a new one:
             SmartNSBulkConversionWindow window = (SmartNSBulkConversionWindow)EditorWindow.GetWindow(typeof(SmartNSBulkConversionWindow));
@@ -23,7 +23,6 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
         private List<string> _assetsToProcess;
         private int _progressCount;
 
-
         private string _scriptRootSettingsValue;
         private string _prefixSettingsValue;
         private string _universalNamespaceSettingsValue;
@@ -33,7 +32,6 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
         private bool _enableDebugLogging;
 
         private HashSet<string> _ignoredDirectories;
-
 
         private static string GetClickedDirFullPath()
         {
@@ -64,15 +62,13 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
                     {
                         return clickedPath.Substring(0, lastBackSlashIndex);
                     }
-
                 }
-
             }
 
             return null;
         }
 
-        void OnGUI()
+        private void OnGUI()
         {
             if (string.IsNullOrWhiteSpace(_baseDirectory))
             {
@@ -86,7 +82,6 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
 
             GUILayout.Label("SmartNS Bulk Namespace Conversion", EditorStyles.boldLabel);
 
-
             int yPos = 20;
             GUI.Box(new Rect(0, yPos, position.width, 220), @"This tool will automatically add or correct the namespaces on any C# scripts in your project, making them consistent with your SmartNS settings.
 
@@ -97,7 +92,6 @@ This is a potentially destrucive tool. It will modify the actual file contents o
 See the Documentation.txt file for more information on this. But in general, you probably shouldn't run this on 3rd-party code you got from the asset store.");
 
             yPos += 220;
-
 
             GUI.Box(new Rect(0, yPos, position.width, 100), @"Instructions:
  - Click the 'Base Directory' button to choose the base directory. Only scripts in, or under, that directory will be processed.
@@ -118,10 +112,7 @@ See the Documentation.txt file for more information on this. But in general, you
                 }
             }
 
-
             yPos += 30;
-
-
 
             if (!_isProcessing)
             {
@@ -135,7 +126,6 @@ See the Documentation.txt file for more information on this. But in general, you
                     {
                         assetBasePath += "/";
                     }
-
 
                     _assetsToProcess = GetAssetsToProcess(assetBasePath);
 
@@ -156,14 +146,11 @@ See the Documentation.txt file for more information on this. But in general, you
                         // Cache this once now, for performance reasons.
                         _ignoredDirectories = SmartNS.GetIgnoredDirectories();
 
-
-
                         _progressCount = 0;
                         _isProcessing = true;
                     }
                 }
             }
-
 
             if (_isProcessing)
             {
@@ -199,7 +186,7 @@ See the Documentation.txt file for more information on this. But in general, you
                 }
                 else
                 {
-                    // We done. 
+                    // We done.
                     _isProcessing = false;
                     _ignoredDirectories = null;
                     _progressCount = 0;
@@ -207,7 +194,6 @@ See the Documentation.txt file for more information on this. But in general, you
                     Debug.Log("Bulk Namespace Conversion complete.");
                 }
             }
-
         }
 
         private List<string> GetAssetsToProcess(string assetBasePath)
@@ -220,7 +206,6 @@ See the Documentation.txt file for more information on this. But in general, you
                 var fullFilePath = Application.dataPath.Substring(0, indexOfAsset) + assetPath;
                 var fileInfo = new FileInfo(fullFilePath);
                 return ignoredDirectories.Contains(fileInfo.Directory.FullName);
-
             };
 
             return AssetDatabase.GetAllAssetPaths()
@@ -231,7 +216,7 @@ See the Documentation.txt file for more information on this. But in general, you
                         && !isInIgnoredDirectory(s)).ToList();
         }
 
-        void Update()
+        private void Update()
         {
             if (_isProcessing)
             {
