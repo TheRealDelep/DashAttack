@@ -52,8 +52,6 @@ namespace DashAttack.Gameplay.Behaviours.Concretes
             SubscribeAfterUpdate(AfterStateUpdate);
 
             Start(Rest);
-
-            OnStateChange += (previous, next) => Debug.Log($"Transition From {previous} to {next} @ {Time.time}, CurrentVelocity:{CurrentVelocity}");
         }
 
         private void BeforeStateUpdate()
@@ -137,7 +135,6 @@ namespace DashAttack.Gameplay.Behaviours.Concretes
                 _ when Mathf.Sign(Context.RunDirection) != Mathf.Sign(lastFrameRunDirection)
                     && lastFrameRunDirection != 0
                     && !isTurningFrame => Accelerating,
-                _ when Mathf.Sign(CurrentVelocity) != Mathf.Sign(lastFrameVelocity) && !isTurningFrame => Accelerating,
                 _ => null
             };
 

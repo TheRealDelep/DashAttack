@@ -12,7 +12,11 @@ namespace DashAttack.Gameplay.Behaviours.Concretes
         private Vector2 currentVelocity;
         private float direction;
 
-        public override Vector2 Velocity => currentVelocity;
+        public override Vector2 Velocity
+        {
+            get => currentVelocity;
+            set => currentVelocity = value;
+        }
 
         public WallJump(IWallJumpData data, IWallJumpContext context)
             : base(data, context)

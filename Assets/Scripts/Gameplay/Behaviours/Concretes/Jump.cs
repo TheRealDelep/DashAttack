@@ -11,7 +11,11 @@ namespace DashAttack.Gameplay.Behaviours.Concretes
     {
         private float currentVelocity;
 
-        public override Vector2 Velocity => new(0, currentVelocity);
+        public override Vector2 Velocity
+        {
+            get => new(0, currentVelocity);
+            set => currentVelocity = value.y;
+        }
 
         private float WallMultiplier
             => Context.Collisions.Left && Context.Collisions.Right

@@ -71,8 +71,10 @@ namespace DashAttack.Entities.Player
             {
                 if (current is Rest)
                 {
-                    Jump.TransitionTo(Rest);
                     Fall.TransitionTo(Rest);
+
+                    Jump.TransitionTo(Executing);
+                    Jump.Velocity = new Vector2(0, data.AfterWallJumpVerticalVelocity);
 
                     Run.Velocity = new Vector2(data.MaxSpeed * wallJumpDirection, 0);
                     var nextRunState = Mathf.Sign(context.RunDirection) == -wallJumpDirection

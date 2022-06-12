@@ -19,6 +19,9 @@ namespace DashAttack.Entities.Player
         [SerializeField] private float wallSlideMultiplier;
         [SerializeField] private float wallClimbMultiplier;
         [SerializeField] private float wallJumpDistance;
+        [SerializeField] private float wallJumpHorizontalVelocity;
+        
+        private Vector2 wallJumpVelocity;
 
         // ========== RUN PROPERTIES ==========
 
@@ -96,7 +99,15 @@ namespace DashAttack.Entities.Player
 
         public Vector2 WallJumpVelocity { get; private set; }
 
+        private float WallJumpHorizontalVelocity
+        {
+            get => wallJumpHorizontalVelocity;
+            set => wallJumpHorizontalVelocity = Mathf.Clamp(value, MaxSpeed * 2, MaxSpeed * 5);
+        }
+
         public Vector2 WallJumpDeceleration { get; private set; }
+        
+        public float AfterWallJumpVerticalVelocity { get; private set; }
 
         private void OnValidate()
         {
@@ -112,6 +123,7 @@ namespace DashAttack.Entities.Player
             WallSlideMultiplier = wallSlideMultiplier;
             WallClimbMultiplier = wallClimbMultiplier;
             WallJumpDistance = wallJumpDistance;
+            WallJumpHorizontalVelocity = wallJumpHorizontalVelocity;
 
             ComputeJumpVelocity();
             ComputeWallJumpVelocity();
@@ -132,13 +144,15 @@ namespace DashAttack.Entities.Player
             float distanceTurning = turningForce * Mathf.Pow(timeTurning, 2) / 2;
 
             float wallJumpingDistance = WallJumpDistance - distanceTurning;
-            float horizontalVelocity = MaxSpeed * 1.5f;
-            float wallJumpingTime = wallJumpingDistance / ((MaxSpeed + horizontalVelocity) / 2);
+            float wallJumpingTime = wallJumpingDistance / ((MaxSpeed + WallJumpHorizontalVelocity) / 2);
 
-            float horizontalDeceleration = (horizontalVelocity - MaxSpeed) / wallJumpingTime;
-            
-            WallJumpVelocity = new Vector2(horizontalVelocity, 0);
-            WallJumpDeceleration = new Vector2(horizontalDeceleration, 0);
+            float horizontalDeceleration = (WallJumpHorizontalVelocity - MaxSpeed) / wallJumpingTime;
+
+            AfterWallJumpVerticalVelocity = timeTurning * Gravity;
+            float verticalVelocity = AfterWallJumpVerticalVelocity + (wallJumpingTime * Gravity);
+
+            WallJumpVelocity = new Vector2(WallJumpHorizontalVelocity, verticalVelocity);
+            WallJumpDeceleration = new Vector2(horizontalDeceleration, Gravity);
         }
     }
 }

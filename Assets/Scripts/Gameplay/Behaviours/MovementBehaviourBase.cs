@@ -51,7 +51,7 @@ namespace DashAttack.Gameplay.Behaviours
             }
         }
 
-        public abstract Vector2 Velocity { get; }
+        public abstract Vector2 Velocity { get; set; }
 
         public BehaviourState CurrentState
             => IsExecuting ? Executing : Rest;
