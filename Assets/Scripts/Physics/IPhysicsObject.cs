@@ -11,6 +11,8 @@ namespace DashAttack.Physics
 
         IEnumerable<RaycastHit2D> CurrentCollisions { get; }
 
+        CollisionInfos CollisionInfos { get; }
+
         Vector2 Position { get; }
 
         void Move(Vector2 movement);

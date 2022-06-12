@@ -1,78 +1,87 @@
-﻿using DashAttack.Gameplay.Behaviours.Concretes;
-using DashAttack.Gameplay.Behaviours.Interfaces;
-using DashAttack.Gameplay.Behaviours.Interfaces.Contexts;
-using DashAttack.Gameplay.Behaviours.Interfaces.Datas;
+﻿using System;
+
+using DashAttack.Gameplay.Behaviours.Concretes;
 using DashAttack.Physics;
+
 using UnityEngine;
+
+using static DashAttack.Gameplay.Behaviours.Enums.BehaviourState;
 
 namespace DashAttack.Entities.Player
 {
     public class PlayerController : MonoBehaviour
     {
-        [SerializeField] private PlayerData player;
+        [SerializeField] private PlayerData data;
 
+        private float wallJumpDirection;
+        
         private PlayerContext context;
         private IPhysicsObject physicsObject;
 
-        private IBehaviour<IFallData, IFallContext> fall;
-        private IBehaviour<IRunData, IRunContext> run;
-        private IBehaviour<IJumpData, IJumpContext> jump;
-        private IBehaviour<IWallStickData, IBehaviourContext> wallSitck;
-        private IBehaviour<IWallJumpData, IWallJumpContext> wallJump;
-
-        private bool enableFall => !jump.IsExecuting && !wallJump.IsExecuting;
-
-        private bool enableRun => !wallSitck.IsExecuting && !wallJump.IsExecuting;
-
-        private bool enableJump => !wallJump.IsExecuting;
+        private Fall Fall { get; set; }
+        private Jump Jump { get; set; }
+        private Run Run { get; set; }
+        private WallJump WallJump { get; set; }
 
         private void Start()
         {
             physicsObject = GetComponent<IPhysicsObject>();
+            context = new PlayerContext(physicsObject);
 
-            context = new PlayerContext();
+            Fall = new Fall(data, context);
+            Run = new Run(data, context);
+            Jump = new Jump(data, context);
+            WallJump = new WallJump(data, context);
 
-            fall = new Fall();
-            run = new Run();
-            jump = new Jump();
-            wallSitck = new WallStick();
-            wallJump = new WallJump();
-
-            fall.Init(physicsObject, player, context);
-            run.Init(physicsObject, player, context);
-            jump.Init(physicsObject, player, context);
-            wallSitck.Init(physicsObject, player, context);
-            wallJump.Init(physicsObject, player, context);
+            SubscribeStates();
         }
 
         private void FixedUpdate()
         {
-            wallSitck.Update();
+            UpdateBehaviours();
+            physicsObject.Move(ComputeVelocity() * context.DeltaTime);
+        }
 
-            if (enableRun)
+        private Vector2 ComputeVelocity()
+        {
+            if (WallJump.CurrentState is Executing)
             {
-                run.Update();
+                return WallJump.Velocity;
             }
+            
+            var verticalVel = Jump.CurrentState is Executing
+                ? Jump.Velocity
+                : Fall.Velocity;
+            
+            return Run.Velocity + verticalVel;
+        }
 
-            if (enableJump)
+        private void SubscribeStates()
+        {
+            Jump.OnStateChange += (_, current) =>
             {
-                jump.Update();
-            }
-            else
-            {
-                jump.Reset();
-            }
+                if (current is Rest)
+                {
+                    Fall.TransitionTo(Rest);
+                }
+            };
 
-            if (enableFall)
+            WallJump.OnStateChange += (_, current) =>
             {
-                fall.Update();
-            }
-            else
-            {
-                fall.Reset();
-            }
+                if (current is Rest)
+                {
+                    Jump.TransitionTo(Rest);
+                    Fall.TransitionTo(Rest);
+                }
+            };
+        }
 
-            wallJump.Update();
+        private void UpdateBehaviours()
+        {
+            Fall.UpdateState();
+            Jump.UpdateState();
+            Run.UpdateState();
+            WallJump.UpdateState();
         }
     }
 }

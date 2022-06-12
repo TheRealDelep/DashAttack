@@ -8,8 +8,8 @@ namespace DashAttack.Utilities.StateMachine
     public class StateMachine<TStateEnum>
         where TStateEnum : Enum
     {
-        private event Action afterStateUpdate;
-        private event Action beforeStateUpdate;
+        private event Action AfterStateUpdate;
+        private event Action BeforeStateUpdate;
 
         private Dictionary<TStateEnum, State<TStateEnum>> states = new();
 
@@ -17,7 +17,13 @@ namespace DashAttack.Utilities.StateMachine
 
         public TStateEnum PreviousState { get; private set; }
 
-        public void AddState(TStateEnum stateEnum, Action onStateEnter = null, Action onStateLeave = null, Action onStateUpdate = null)
+        public TStateEnum EntryState { get; private set; }
+
+        public void AddState(
+            TStateEnum stateEnum, 
+            Action onStateEnter = null,
+            Action onStateUpdate = null,
+            Action onStateLeave = null)
         {
             if (states.ContainsKey(stateEnum))
             {
@@ -40,14 +46,15 @@ namespace DashAttack.Utilities.StateMachine
                 throw new ArgumentException($"StateMachine doesn't contain a state of type {entryState}");
             }
 
-            CurrentState = entryState;
+            EntryState = entryState;
+            CurrentState = EntryState;
         }
 
         public void RunMachine()
         {
-            beforeStateUpdate?.Invoke();
+            BeforeStateUpdate?.Invoke();
             states[CurrentState].OnStateUpdate();
-            afterStateUpdate?.Invoke();
+            AfterStateUpdate?.Invoke();
         }
 
         public void TransitionTo(TStateEnum nextState)
@@ -76,13 +83,16 @@ namespace DashAttack.Utilities.StateMachine
                 case OnUpdate:
                     states[state].StateUpdated += action;
                     break;
+                
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(stateEvent), stateEvent, null);
             }
         }
 
         public void SubscribeAfterUpdate(Action action)
-            => afterStateUpdate += action;
+            => AfterStateUpdate += action;
 
         public void SubscribeBeforeUpdate(Action action)
-            => beforeStateUpdate += action;
+            => BeforeStateUpdate += action;
     }
 }

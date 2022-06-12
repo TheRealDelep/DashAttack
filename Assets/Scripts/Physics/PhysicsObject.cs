@@ -15,6 +15,8 @@ namespace DashAttack.Physics
         private Rigidbody2D rb;
         private ICollisionDetector collisionDetector;
 
+        public CollisionInfos CollisionInfos { get; private set; }
+
         public Vector2 Velocity { get; private set; }
 
         public IEnumerable<RaycastHit2D> CurrentCollisions { get; private set; } = Enumerable.Empty<RaycastHit2D>();
@@ -61,6 +63,8 @@ namespace DashAttack.Physics
 
             OnCollisionEnter?.Invoke(newCollisions);
             OnCollisionExit?.Invoke(oldCollisions);
+
+            CollisionInfos = CollisionInfos.FromHits(CurrentCollisions);
         }
 
         private void Start()

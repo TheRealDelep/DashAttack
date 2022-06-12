@@ -1,28 +1,44 @@
 ﻿using DashAttack.Gameplay.Behaviours.Interfaces.Contexts;
 using DashAttack.Gameplay.Behaviours.Interfaces.Datas;
-using System.Linq;
+
 using UnityEngine;
 
 namespace DashAttack.Gameplay.Behaviours.Concretes
 {
-    public class Fall : BaseBehaviour<IFallData, IFallContext>
+    public class Fall : MovementBehaviourBase<IFallData, IFallContext>
     {
         private float currentVelocity;
 
-        public override bool IsExecuting => true;
+        public override Vector2 Velocity => new(0, currentVelocity);
 
-        public override void Update()
+        private float WallMultiplier
+            => Context.Collisions.Left || Context.Collisions.Right
+                ? Data.WallSlideMultiplier
+                : 1;
+
+        public Fall(IFallData data, IFallContext input)
+            : base(data, input)
         {
-            if (physicsObject.CurrentCollisions.Any(h => h.normal == Vector2.up))
+        }
+
+        public override void UpdateState()
+        {
+            IsExecuting = true;
+            
+            if (Context.Collisions.Bottom)
             {
                 currentVelocity = 0;
             }
 
-            currentVelocity -= Mathf.Abs(data.Gravity) * Time.fixedDeltaTime * Time.fixedDeltaTime;
-            physicsObject.Move(0, currentVelocity);
+            currentVelocity -= Mathf.Abs(Data.Gravity) * WallMultiplier * Context.DeltaTime;
         }
 
-        public override void Reset()
+        protected override void OnBehaviourStart()
+        {
+            // Nothing to do here
+        }
+
+        protected override void OnBehaviourEnd()
             => currentVelocity = 0;
     }
 }

@@ -2,7 +2,7 @@
 
 namespace DashAttack.Gameplay.Behaviours.Interfaces.Datas
 {
-    public interface IWallJumpData : IBehaviourData
+    public interface IWallJumpData : IMovementBehaviourData
     {
         Vector2 ImpulseVelocity { get; }
 

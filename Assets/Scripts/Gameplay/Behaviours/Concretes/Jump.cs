@@ -1,107 +1,49 @@
-﻿using DashAttack.Gameplay.Behaviours.Enums;
+﻿using System;
+
 using DashAttack.Gameplay.Behaviours.Interfaces.Contexts;
 using DashAttack.Gameplay.Behaviours.Interfaces.Datas;
-using System.Linq;
-using UnityEngine;
 
-using static DashAttack.Gameplay.Behaviours.Enums.JumpState;
+using UnityEngine;
 
 namespace DashAttack.Gameplay.Behaviours.Concretes
 {
-    public class Jump : StateMachineBehaviour<IJumpData, IJumpContext, JumpState>
+    public class Jump : MovementBehaviourBase<IJumpData, IJumpContext>
     {
         private float currentVelocity;
 
-        public override bool IsExecuting => CurrentState != Rest;
-
-        private bool IsGrounded
-                    => physicsObject.CurrentCollisions.Any(h => h.normal == Vector2.up);
-
-        private bool hasCollisionOnSide
-            => physicsObject.CurrentCollisions.Any(h
-                => h.normal == Vector2.left
-                || h.normal == Vector2.right);
+        public override Vector2 Velocity => new(0, currentVelocity);
 
         private float WallMultiplier
+            => Context.Collisions.Left && Context.Collisions.Right
+                ? Data.WallClimbMultiplier
+                : 1;
+
+        public Jump(IJumpData data, IJumpContext context)
+            : base(data, context)
         {
-            get
+        }
+
+        public override void UpdateState()
+        {
+            if (IsExecuting)
             {
-                if (data.WallSlideMultiplier == 1 && data.WallClimbMultiplier == 1 || !hasCollisionOnSide)
+                currentVelocity -= Data.Gravity * WallMultiplier * Context.DeltaTime;
+                
+                if (Context.Collisions.Top || currentVelocity <= 0.0001f || !Context.JumpInput)
                 {
-                    return 1;
+                    IsExecuting = false;
                 }
-
-                return CurrentState switch
-                {
-                    Rising => data.WallClimbMultiplier,
-                    Falling => data.WallSlideMultiplier,
-                    _ => 1
-                };
             }
-        }
-
-        public override void Reset() => stateMachine.TransitionTo(Rest);
-
-        protected override void InitStateMachine()
-        {
-            base.InitStateMachine();
-
-            stateMachine.AddState(Rest, onStateEnter: OnRestEnter, onStateUpdate: OnRestUpdate);
-            stateMachine.AddState(Rising, onStateEnter: OnRisingEnter, onStateUpdate: OnRisingUpdate);
-            stateMachine.AddState(Falling, onStateEnter: OnFallingEnter, onStateUpdate: OnFallingUpdate);
-
-            stateMachine.SubscribeAfterUpdate(AfterUpdate);
-
-            stateMachine.Start(Rest);
-        }
-
-        private void AfterUpdate()
-        {
-            if (CurrentState == Rest)
+            else if (Context.JumpInputDown && Context.Collisions.Bottom)
             {
-                return;
+                IsExecuting = true;
             }
-
-            physicsObject.Move(0, currentVelocity * Time.fixedDeltaTime);
         }
 
-        private void OnRestEnter()
+        protected override void OnBehaviourStart()
+            => currentVelocity = Data.JumpVelocity;
+
+        protected override void OnBehaviourEnd()
             => currentVelocity = 0;
-
-        private void OnRestUpdate()
-        {
-            if (input.JumpPressedThisFixedFrame && IsGrounded)
-            {
-                stateMachine.TransitionTo(Rising);
-            }
-        }
-
-        private void OnRisingEnter()
-            => currentVelocity = data.JumpVelocity + data.Gravity * Time.fixedDeltaTime;
-
-        private void OnRisingUpdate()
-        {
-            currentVelocity -= data.Gravity * WallMultiplier * Time.fixedDeltaTime;
-            var hasCollisionUp = physicsObject.CurrentCollisions.Any(h => h.normal == Vector2.down);
-            if (hasCollisionUp || currentVelocity <= 0 || !input.Jump)
-            {
-                stateMachine.TransitionTo(Falling);
-            }
-        }
-
-        private void OnFallingEnter()
-        {
-            currentVelocity -= data.Gravity * WallMultiplier * Time.fixedDeltaTime;
-        }
-
-        private void OnFallingUpdate()
-        {
-            if (IsGrounded)
-            {
-                stateMachine.TransitionTo(Rest);
-            }
-
-            currentVelocity -= data.Gravity * WallMultiplier * Time.fixedDeltaTime;
-        }
     }
 }

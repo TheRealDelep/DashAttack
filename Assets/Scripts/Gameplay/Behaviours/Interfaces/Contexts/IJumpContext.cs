@@ -1,9 +1,9 @@
 ﻿namespace DashAttack.Gameplay.Behaviours.Interfaces.Contexts
 {
-    public interface IJumpContext : IBehaviourContext
+    public interface IJumpContext : IMovementBehaviourContext
     {
-        public bool Jump { get; }
+        public bool JumpInput { get; }
 
-        public bool JumpPressedThisFixedFrame { get; }
+        public bool JumpInputDown { get; }
     }
 }

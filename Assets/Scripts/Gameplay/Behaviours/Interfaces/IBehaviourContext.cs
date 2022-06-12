@@ -1,6 +1,11 @@
-﻿namespace DashAttack.Gameplay.Behaviours.Interfaces
+﻿using DashAttack.Physics;
+
+namespace DashAttack.Gameplay.Behaviours.Interfaces
 {
-    public interface IBehaviourContext
+    public interface IMovementBehaviourContext
     {
+        float DeltaTime { get; }
+
+        CollisionInfos Collisions { get; }
     }
 }

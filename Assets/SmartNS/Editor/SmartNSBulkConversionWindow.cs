@@ -7,31 +7,31 @@ using UnityEngine;
 
 namespace GraviaSoftware.SmartNS.SmartNS.Editor
 {
-    public class SmartNSBulkConversionWindow : EditorWindow
+    public class SmartNsBulkConversionWindow : EditorWindow
     {
         [MenuItem("Window/SmartNS/Bulk Namespace Conversion...")]
         private static void Init()
         {
             // Get existing open window or if none, make a new one:
-            SmartNSBulkConversionWindow window = (SmartNSBulkConversionWindow)EditorWindow.GetWindow(typeof(SmartNSBulkConversionWindow));
+            SmartNsBulkConversionWindow window = (SmartNsBulkConversionWindow)EditorWindow.GetWindow(typeof(SmartNsBulkConversionWindow));
             window.titleContent = new GUIContent("Bulk Namespace Converter");
             window.Show();
         }
 
-        private string _baseDirectory = "";
-        private bool _isProcessing = false;
-        private List<string> _assetsToProcess;
-        private int _progressCount;
+        private string baseDirectory = "";
+        private bool isProcessing = false;
+        private List<string> assetsToProcess;
+        private int progressCount;
 
-        private string _scriptRootSettingsValue;
-        private string _prefixSettingsValue;
-        private string _universalNamespaceSettingsValue;
-        private bool _useSpacesSettingsValue;
-        private int _numberOfSpacesSettingsValue;
-        private string _directoryDenyListSettingsValue;
-        private bool _enableDebugLogging;
+        private string scriptRootSettingsValue;
+        private string prefixSettingsValue;
+        private string universalNamespaceSettingsValue;
+        private bool useSpacesSettingsValue;
+        private int numberOfSpacesSettingsValue;
+        private string directoryDenyListSettingsValue;
+        private bool enableDebugLogging;
 
-        private HashSet<string> _ignoredDirectories;
+        private HashSet<string> ignoredDirectories;
 
         private static string GetClickedDirFullPath()
         {
@@ -70,14 +70,14 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
 
         private void OnGUI()
         {
-            if (string.IsNullOrWhiteSpace(_baseDirectory))
+            if (string.IsNullOrWhiteSpace(baseDirectory))
             {
-                _baseDirectory = GetClickedDirFullPath();
+                baseDirectory = GetClickedDirFullPath();
             }
 
-            if (string.IsNullOrWhiteSpace(_baseDirectory))
+            if (string.IsNullOrWhiteSpace(baseDirectory))
             {
-                _baseDirectory = "Assets";
+                baseDirectory = "Assets";
             }
 
             GUILayout.Label("SmartNS Bulk Namespace Conversion", EditorStyles.boldLabel);
@@ -100,96 +100,96 @@ See the Documentation.txt file for more information on this. But in general, you
 
             yPos += 100;
 
-            var baseDirectoryLabel = new GUIContent(string.Format("Base Directory: {0}", _baseDirectory), "SmartNS will search all scripts in, or below, this directory. Use this to limit the search to a subdirectory.");
+            var baseDirectoryLabel = new GUIContent(string.Format("Base Directory: {0}", baseDirectory), "SmartNS will search all scripts in, or below, this directory. Use this to limit the search to a subdirectory.");
 
             if (GUI.Button(new Rect(3, yPos, position.width - 6, 20), baseDirectoryLabel))
             {
-                var fullPath = EditorUtility.OpenFolderPanel("Choose root folder", _baseDirectory, "");
-                _baseDirectory = fullPath.Replace(Application.dataPath, "Assets").Trim();
-                if (string.IsNullOrWhiteSpace(_baseDirectory))
+                var fullPath = EditorUtility.OpenFolderPanel("Choose root folder", baseDirectory, "");
+                baseDirectory = fullPath.Replace(Application.dataPath, "Assets").Trim();
+                if (string.IsNullOrWhiteSpace(baseDirectory))
                 {
-                    _baseDirectory = "Assets";
+                    baseDirectory = "Assets";
                 }
             }
 
             yPos += 30;
 
-            if (!_isProcessing)
+            if (!isProcessing)
             {
                 var submitButtonContent = new GUIContent("Begin Namespace Conversion", "Begin processing scripts");
                 var submitButtonStyle = new GUIStyle(GUI.skin.button);
                 submitButtonStyle.normal.textColor = new Color(0, .5f, 0);
                 if (GUI.Button(new Rect(position.width / 2 - 350 / 2, yPos, 350, 30), submitButtonContent, submitButtonStyle))
                 {
-                    string assetBasePath = (string.IsNullOrWhiteSpace(_baseDirectory) ? "Assets" : _baseDirectory).Trim();
+                    string assetBasePath = (string.IsNullOrWhiteSpace(baseDirectory) ? "Assets" : baseDirectory).Trim();
                     if (!assetBasePath.EndsWith("/"))
                     {
                         assetBasePath += "/";
                     }
 
-                    _assetsToProcess = GetAssetsToProcess(assetBasePath);
+                    assetsToProcess = GetAssetsToProcess(assetBasePath);
 
                     if (EditorUtility.DisplayDialog("Are you sure?",
-                        string.Format("This will process a total of {0} scripts found in or under the '{1}' directory, updating their namespaces based on your current SmartNS settings. You should back up your project before doing this, in case something goes wrong. Are you sure you want to do this?", _assetsToProcess.Count, assetBasePath),
-                        string.Format("I'm sure. Process {0} scripts", _assetsToProcess.Count),
+                        string.Format("This will process a total of {0} scripts found in or under the '{1}' directory, updating their namespaces based on your current SmartNS settings. You should back up your project before doing this, in case something goes wrong. Are you sure you want to do this?", assetsToProcess.Count, assetBasePath),
+                        string.Format("I'm sure. Process {0} scripts", assetsToProcess.Count),
                         "Cancel"))
                     {
-                        var smartNSSettings = SmartNSSettings.GetSerializedSettings();
-                        _scriptRootSettingsValue = smartNSSettings.FindProperty("m_ScriptRoot").stringValue;
-                        _prefixSettingsValue = smartNSSettings.FindProperty("m_NamespacePrefix").stringValue;
-                        _universalNamespaceSettingsValue = smartNSSettings.FindProperty("m_UniversalNamespace").stringValue;
-                        _useSpacesSettingsValue = smartNSSettings.FindProperty("m_IndentUsingSpaces").boolValue;
-                        _numberOfSpacesSettingsValue = smartNSSettings.FindProperty("m_NumberOfSpaces").intValue;
-                        _directoryDenyListSettingsValue = smartNSSettings.FindProperty("m_DirectoryIgnoreList").stringValue;
-                        _enableDebugLogging = smartNSSettings.FindProperty("m_EnableDebugLogging").boolValue;
+                        var smartNsSettings = SmartNsSettings.GetSerializedSettings();
+                        scriptRootSettingsValue = smartNsSettings.FindProperty("m_ScriptRoot").stringValue;
+                        prefixSettingsValue = smartNsSettings.FindProperty("m_NamespacePrefix").stringValue;
+                        universalNamespaceSettingsValue = smartNsSettings.FindProperty("m_UniversalNamespace").stringValue;
+                        useSpacesSettingsValue = smartNsSettings.FindProperty("m_IndentUsingSpaces").boolValue;
+                        numberOfSpacesSettingsValue = smartNsSettings.FindProperty("m_NumberOfSpaces").intValue;
+                        directoryDenyListSettingsValue = smartNsSettings.FindProperty("m_DirectoryIgnoreList").stringValue;
+                        enableDebugLogging = smartNsSettings.FindProperty("m_EnableDebugLogging").boolValue;
 
                         // Cache this once now, for performance reasons.
-                        _ignoredDirectories = SmartNS.GetIgnoredDirectories();
+                        ignoredDirectories = SmartNs.GetIgnoredDirectories();
 
-                        _progressCount = 0;
-                        _isProcessing = true;
+                        progressCount = 0;
+                        isProcessing = true;
                     }
                 }
             }
 
-            if (_isProcessing)
+            if (isProcessing)
             {
                 var cancelButtonContent = new GUIContent("Cancel", "Cancel script conversion");
                 var cancelButtonStyle = new GUIStyle(GUI.skin.button);
                 cancelButtonStyle.normal.textColor = new Color(.5f, 0, 0);
                 if (GUI.Button(new Rect(position.width / 2 - 50 / 2, yPos, 50, 30), cancelButtonContent, cancelButtonStyle))
                 {
-                    _isProcessing = false;
-                    _progressCount = 0;
+                    isProcessing = false;
+                    progressCount = 0;
                     AssetDatabase.Refresh();
                     Log("Cancelled");
                 }
 
                 yPos += 40;
 
-                if (_progressCount < _assetsToProcess.Count)
+                if (progressCount < assetsToProcess.Count)
                 {
-                    EditorGUI.ProgressBar(new Rect(3, yPos, position.width - 6, 20), (float)_progressCount / (float)_assetsToProcess.Count, string.Format("Processing {0} ({1}/{2})", _assetsToProcess[_progressCount], _progressCount, _assetsToProcess.Count));
-                    Log("Processing " + _assetsToProcess[_progressCount]);
+                    EditorGUI.ProgressBar(new Rect(3, yPos, position.width - 6, 20), (float)progressCount / (float)assetsToProcess.Count, string.Format("Processing {0} ({1}/{2})", assetsToProcess[progressCount], progressCount, assetsToProcess.Count));
+                    Log("Processing " + assetsToProcess[progressCount]);
 
-                    SmartNS.UpdateAssetNamespace(_assetsToProcess[_progressCount],
-                        _scriptRootSettingsValue,
-                        _prefixSettingsValue,
-                        _universalNamespaceSettingsValue,
-                        _useSpacesSettingsValue,
-                        _numberOfSpacesSettingsValue,
-                        _directoryDenyListSettingsValue,
-                        _enableDebugLogging,
-                        directoryIgnoreList: _ignoredDirectories);
+                    SmartNs.UpdateAssetNamespace(assetsToProcess[progressCount],
+                        scriptRootSettingsValue,
+                        prefixSettingsValue,
+                        universalNamespaceSettingsValue,
+                        useSpacesSettingsValue,
+                        numberOfSpacesSettingsValue,
+                        directoryDenyListSettingsValue,
+                        enableDebugLogging,
+                        directoryIgnoreList: ignoredDirectories);
 
-                    _progressCount++;
+                    progressCount++;
                 }
                 else
                 {
                     // We done.
-                    _isProcessing = false;
-                    _ignoredDirectories = null;
-                    _progressCount = 0;
+                    isProcessing = false;
+                    ignoredDirectories = null;
+                    progressCount = 0;
                     AssetDatabase.Refresh();
                     Debug.Log("Bulk Namespace Conversion complete.");
                 }
@@ -198,7 +198,7 @@ See the Documentation.txt file for more information on this. But in general, you
 
         private List<string> GetAssetsToProcess(string assetBasePath)
         {
-            var ignoredDirectories = SmartNS.GetIgnoredDirectories();
+            var ignoredDirectories = SmartNs.GetIgnoredDirectories();
 
             Func<string, bool> isInIgnoredDirectory = (assetPath) =>
             {
@@ -218,7 +218,7 @@ See the Documentation.txt file for more information on this. But in general, you
 
         private void Update()
         {
-            if (_isProcessing)
+            if (isProcessing)
             {
                 // Without this, we don't get updates every frame, and the whole window just creeps along.
                 Repaint();

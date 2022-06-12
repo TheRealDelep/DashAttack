@@ -13,15 +13,15 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
     /// An Asset Creation Post-processor that acts on newly created c# scripts to insert a smart namespace based
     /// on the path of the script.
     /// </summary>
-    public class SmartNS : UnityEditor.AssetModificationProcessor
+    public class SmartNs : UnityEditor.AssetModificationProcessor
     {
-        public const string SmartNSVersionNumber = "2.0.2";
+        public const string SmartNsVersionNumber = "2.0.2";
 
         // TODO: Do we need something else for Mac?
-        private static string PathSeparator = "/";
+        private static string pathSeparator = "/";
 
-        private static string ByteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
-        private static bool _shouldWriteDebugLogInfo = false;
+        private static string byteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
+        private static bool shouldWriteDebugLogInfo = false;
 
         #region Asset Creation
 
@@ -47,9 +47,9 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
                     return;
                 }
 
-                var smartNSSettings = SmartNSSettings.GetSerializedSettings();
-                var enableDebugLogging = smartNSSettings.FindProperty("m_EnableDebugLogging").boolValue;
-                _shouldWriteDebugLogInfo = enableDebugLogging;
+                var smartNsSettings = SmartNsSettings.GetSerializedSettings();
+                var enableDebugLogging = smartNsSettings.FindProperty("m_EnableDebugLogging").boolValue;
+                shouldWriteDebugLogInfo = enableDebugLogging;
 
                 ProcessNamespaceForScriptAtPath(path);
             }
@@ -64,7 +64,7 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
 
         #region Asset Moved
 
-        private static HashSet<string> _currentlyMovingAssets = new HashSet<string>();
+        private static HashSet<string> currentlyMovingAssets = new HashSet<string>();
 
         public static AssetMoveResult OnWillMoveAsset(string sourcePath, string destinationPath)
         {
@@ -72,17 +72,17 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
 
             try
             {
-                if (!_currentlyMovingAssets.Contains(sourcePath))
+                if (!currentlyMovingAssets.Contains(sourcePath))
                 {
-                    if (!SmartNSSettings.SettingsFileExists())
+                    if (!SmartNsSettings.SettingsFileExists())
                     {
-                        SmartNSSettings.GetOrCreateSettings();
+                        SmartNsSettings.GetOrCreateSettings();
                     }
 
-                    var smartNSSettings = SmartNSSettings.GetSerializedSettings();
-                    var updateNamespacesWhenMovingScripts = smartNSSettings.FindProperty("m_UpdateNamespacesWhenMovingScripts").boolValue;
-                    var enableDebugLogging = smartNSSettings.FindProperty("m_EnableDebugLogging").boolValue;
-                    _shouldWriteDebugLogInfo = enableDebugLogging;
+                    var smartNsSettings = SmartNsSettings.GetSerializedSettings();
+                    var updateNamespacesWhenMovingScripts = smartNsSettings.FindProperty("m_UpdateNamespacesWhenMovingScripts").boolValue;
+                    var enableDebugLogging = smartNsSettings.FindProperty("m_EnableDebugLogging").boolValue;
+                    shouldWriteDebugLogInfo = enableDebugLogging;
 
                     if (updateNamespacesWhenMovingScripts)
                     {
@@ -99,7 +99,7 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
                             {
                                 // Keep track of the fact that we're moving this asset, because OnWillMoveAsset will be called again
                                 // when we call MoveAsset below. We keep track of it to avoid recursing into this code again.
-                                _currentlyMovingAssets.Add(sourcePath);
+                                currentlyMovingAssets.Add(sourcePath);
 
                                 // We can move this. So go ahead.
                                 AssetDatabase.MoveAsset(sourcePath, destinationPath);
@@ -120,7 +120,7 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
             }
             finally
             {
-                _currentlyMovingAssets.Remove(sourcePath);
+                currentlyMovingAssets.Remove(sourcePath);
             }
 
             return assetMoveResult;
@@ -131,20 +131,20 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
         private static void ProcessNamespaceForScriptAtPath(string path, HashSet<string> directoryIgnoreList = null)
         {
             // We depend on a properly created Project Settings file. Create it now, if it doesn't exist.
-            if (!SmartNSSettings.SettingsFileExists())
+            if (!SmartNsSettings.SettingsFileExists())
             {
-                SmartNSSettings.GetOrCreateSettings();
+                SmartNsSettings.GetOrCreateSettings();
             }
 
-            var smartNSSettings = SmartNSSettings.GetSerializedSettings();
-            var scriptRootSettingsValue = smartNSSettings.FindProperty("m_ScriptRoot").stringValue;
-            var prefixSettingsValue = smartNSSettings.FindProperty("m_NamespacePrefix").stringValue;
-            var universalNamespaceSettingsValue = smartNSSettings.FindProperty("m_UniversalNamespace").stringValue;
-            var useSpacesSettingsValue = smartNSSettings.FindProperty("m_IndentUsingSpaces").boolValue;
-            var numberOfSpacesSettingsValue = smartNSSettings.FindProperty("m_NumberOfSpaces").intValue;
+            var smartNsSettings = SmartNsSettings.GetSerializedSettings();
+            var scriptRootSettingsValue = smartNsSettings.FindProperty("m_ScriptRoot").stringValue;
+            var prefixSettingsValue = smartNsSettings.FindProperty("m_NamespacePrefix").stringValue;
+            var universalNamespaceSettingsValue = smartNsSettings.FindProperty("m_UniversalNamespace").stringValue;
+            var useSpacesSettingsValue = smartNsSettings.FindProperty("m_IndentUsingSpaces").boolValue;
+            var numberOfSpacesSettingsValue = smartNsSettings.FindProperty("m_NumberOfSpaces").intValue;
             //var defaultScriptCreationDirectorySettingsValue = smartNSSettings.FindProperty("m_DefaultScriptCreationDirectory").stringValue;
-            var directoryDenyListSettingsValue = smartNSSettings.FindProperty("m_DirectoryIgnoreList").stringValue;
-            var enableDebugLogging = smartNSSettings.FindProperty("m_EnableDebugLogging").boolValue;
+            var directoryDenyListSettingsValue = smartNsSettings.FindProperty("m_DirectoryIgnoreList").stringValue;
+            var enableDebugLogging = smartNsSettings.FindProperty("m_EnableDebugLogging").boolValue;
 
             /*
              * This has been commented out. It was causing errors when moving files. I'm not sure why yet, but
@@ -218,7 +218,7 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
             bool enableDebugLogging,
             HashSet<string> directoryIgnoreList = null)
         {
-            _shouldWriteDebugLogInfo = enableDebugLogging;
+            shouldWriteDebugLogInfo = enableDebugLogging;
 
             WriteDebug(string.Format("Acting on new C# file: {0}", assetPath));
             var indexOfAsset = Application.dataPath.LastIndexOf("Assets");
@@ -377,14 +377,14 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
             }
 
             // Similarly, if the file began with "\ufeff", ensure it still does.
-            if (rawFileContents.StartsWith(ByteOrderMarkUtf8))
+            if (rawFileContents.StartsWith(byteOrderMarkUtf8))
             {
                 // This is weird. If I test whether newFileContents already starts with a BOM,
                 // it tells me it does. But if I write the string as-is, the resulting file won't start
                 // with a BOM. So I always need to add the BOM, even if it already has one.
                 // However, if I add two BOMs, then it clear ends up with two BOMs. So, I don't see why
                 // adding one while it has one results in still only having one.
-                newFileContents = ByteOrderMarkUtf8 + newFileContents;
+                newFileContents = byteOrderMarkUtf8 + newFileContents;
             }
 
             System.IO.File.WriteAllText(fullFilePath, newFileContents);
@@ -450,19 +450,19 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
 
                     // New Version: Remove as much of the ScriptRoot as exists in the path, as long as the elements line up
                     // exactly.
-                    foreach (var scriptRootPathPart in Regex.Split(scriptRootValue.Trim(), PathSeparator))
+                    foreach (var scriptRootPathPart in Regex.Split(scriptRootValue.Trim(), pathSeparator))
                     {
                         var toTrim = scriptRootPathPart.Trim();
 
                         // We need to match exactly on each element in the path. We used to just check for StartsWith, but if we
                         // had a prefix of "A" when the path was "ABC", we used to strip the A off the ABC, which was wrong.
-                        if (namespaceValue == toTrim || namespaceValue.StartsWith(toTrim + PathSeparator))
+                        if (namespaceValue == toTrim || namespaceValue.StartsWith(toTrim + pathSeparator))
                         {
                             WriteDebug(string.Format("Trimming script root part '{0}' from start of namespace", toTrim));
                             namespaceValue = namespaceValue.Substring(toTrim.Length);
 
                             // If this leaves the namespace with a "/" at the start, remove that.
-                            if (namespaceValue.StartsWith(PathSeparator))
+                            if (namespaceValue.StartsWith(pathSeparator))
                             {
                                 namespaceValue = namespaceValue.Substring(1);
                             }
@@ -470,7 +470,7 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
                     }
                 }
 
-                var rawPathParts = namespaceValue.Split(PathSeparator.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                var rawPathParts = namespaceValue.Split(pathSeparator.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
 
                 // Ignore the last "part", as that's the file name.
                 var namespaceParts = rawPathParts.Take(rawPathParts.Count() - 1).ToArray();
@@ -543,8 +543,8 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
         public static HashSet<string> GetIgnoredDirectories()
         {
             var retval = new HashSet<string>();
-            var smartNSSettings = SmartNSSettings.GetSerializedSettings();
-            var directoryDenyListSettingsValue = smartNSSettings.FindProperty("m_DirectoryIgnoreList").stringValue;
+            var smartNsSettings = SmartNsSettings.GetSerializedSettings();
+            var directoryDenyListSettingsValue = smartNsSettings.FindProperty("m_DirectoryIgnoreList").stringValue;
 
             foreach (var directoryPathPart in directoryDenyListSettingsValue.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries))
             {
@@ -582,7 +582,7 @@ namespace GraviaSoftware.SmartNS.SmartNS.Editor
         public static void WriteDebug(string message)
         {
             // Note that we depend on calls to have set _shouldWriteDebugLogInfo, for performance reasons.
-            if (_shouldWriteDebugLogInfo)
+            if (shouldWriteDebugLogInfo)
             {
                 Debug.Log(string.Format("SmartNS Debug: {0}", message));
             }

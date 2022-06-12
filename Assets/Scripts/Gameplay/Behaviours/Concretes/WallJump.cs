@@ -1,49 +1,51 @@
-﻿using DashAttack.Gameplay.Behaviours.Interfaces.Contexts;
+﻿using System;
+
+using DashAttack.Gameplay.Behaviours.Interfaces.Contexts;
 using DashAttack.Gameplay.Behaviours.Interfaces.Datas;
-using System.Linq;
+
 using UnityEngine;
 
 namespace DashAttack.Gameplay.Behaviours.Concretes
 {
-    public class WallJump : BaseBehaviour<IWallJumpData, IWallJumpContext>
+    public class WallJump : MovementBehaviourBase<IWallJumpData, IWallJumpContext>
     {
         private Vector2 currentVelocity;
-        private bool isWallJumping;
         private float direction;
 
-        public override bool IsExecuting => isWallJumping;
+        public override Vector2 Velocity => currentVelocity;
 
-        private bool IsOnWall => physicsObject.CurrentCollisions.Any(h => h.normal == Vector2.left || h.normal == Vector2.right);
-
-        private bool isGrounded => physicsObject.CurrentCollisions.Any(h => h.normal == Vector2.up);
-
-        public override void Reset()
+        public WallJump(IWallJumpData data, IWallJumpContext context)
+            : base(data, context)
         {
-            isWallJumping = false;
-            currentVelocity = Vector2.zero;
         }
 
-        public override void Update()
+        protected override void OnBehaviourStart()
         {
-            if (isWallJumping)
+            direction = Context.Collisions.Left ? 1 : -1;
+            currentVelocity = new Vector2(Data.ImpulseVelocity.x * direction, Data.ImpulseVelocity.y);
+        }
+
+        protected override void OnBehaviourEnd()
+            => currentVelocity = Vector2.zero;
+
+        public override void UpdateState()
+        {
+            bool isGrounded = Context.Collisions.Bottom;
+            bool isOnWall = Context.Collisions.Left || Context.Collisions.Right;
+
+            if (IsExecuting)
             {
-                currentVelocity -= new Vector2(data.Deceleration.x * direction, data.Deceleration.y) * Time.fixedDeltaTime;
+                Vector2 deceleration = new(Data.Deceleration.x * direction, Data.Deceleration.y);
+                currentVelocity -= deceleration * Context.DeltaTime;
 
                 if (currentVelocity.x * -direction >= 0)
                 {
-                    Reset();
+                    IsExecuting = false;
                 }
             }
-            else if (input.JumpPressedThisFixedFrame && IsOnWall && !isGrounded)
+            else if (Context.JumpInputDown && !isGrounded && isOnWall)
             {
-                isWallJumping = true;
-                direction = physicsObject.CurrentCollisions.First(h => h.normal == Vector2.left || h.normal == Vector2.right).normal.x;
-                currentVelocity = new(data.ImpulseVelocity.x * direction, data.ImpulseVelocity.y);
-            }
-
-            if (currentVelocity != Vector2.zero)
-            {
-                physicsObject.Move(currentVelocity * Time.fixedDeltaTime);
+                IsExecuting = true;
             }
         }
     }

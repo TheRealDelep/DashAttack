@@ -8,7 +8,7 @@ namespace DashAttack.Physics
     [RequireComponent(typeof(BoxCollider2D))]
     public class BoxCollisionDetector : MonoBehaviour, ICollisionDetector
     {
-        private const float skinWidth = .015f;
+        private const float SkinWidth = .015f;
 
         [SerializeField] private int nbRays;
 
@@ -52,14 +52,14 @@ namespace DashAttack.Physics
             var space = GetRaySpacing(boxCollider.bounds.size.y);
 
             var firstRayPosition = boxCollider.attachedRigidbody.position + new Vector2(
-                MathF.Sign(x) * (boxCollider.bounds.extents.x - skinWidth),
-                -(boxCollider.bounds.extents.y - skinWidth));
+                MathF.Sign(x) * (boxCollider.bounds.extents.x - SkinWidth),
+                -(boxCollider.bounds.extents.y - SkinWidth));
 
             CastRays(
                 firstRayPosition: firstRayPosition,
                 axis: Vector2.up,
                 direction: Vector2.right * Mathf.Sign(x),
-                distance: Mathf.Abs(x) + skinWidth,
+                distance: Mathf.Abs(x) + SkinWidth,
                 space: space);
         }
 
@@ -68,8 +68,8 @@ namespace DashAttack.Physics
             var space = GetRaySpacing(boxCollider.bounds.size.x);
 
             var firstRayPosition = boxCollider.attachedRigidbody.position + new Vector2(
-                -(boxCollider.bounds.extents.x - skinWidth),
-                MathF.Sign(y) * (boxCollider.bounds.extents.y - skinWidth));
+                -(boxCollider.bounds.extents.x - SkinWidth),
+                MathF.Sign(y) * (boxCollider.bounds.extents.y - SkinWidth));
 
             CastRays(
                 firstRayPosition: firstRayPosition,
@@ -90,11 +90,11 @@ namespace DashAttack.Physics
                 }
 
                 var rayOrigin = firstRayPosition + (i * space * axis);
-                var hit = Physics2D.Raycast(rayOrigin, direction, distance + skinWidth);
+                var hit = Physics2D.Raycast(rayOrigin, direction, distance + SkinWidth);
 
                 if (hit)
                 {
-                    hit.distance -= skinWidth;
+                    hit.distance -= SkinWidth;
                 }
 
                 hitBuffer[i + bufferStartIndex] = hit;
@@ -109,7 +109,7 @@ namespace DashAttack.Physics
         }
 
         private float GetRaySpacing(float size)
-            => (size - (skinWidth * 2)) / (nbRays - 1);
+            => (size - (SkinWidth * 2)) / (nbRays - 1);
 
         private void Start()
         {

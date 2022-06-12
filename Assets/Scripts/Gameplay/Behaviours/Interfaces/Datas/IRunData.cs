@@ -1,6 +1,6 @@
 ﻿namespace DashAttack.Gameplay.Behaviours.Interfaces.Datas
 {
-    public interface IRunData : IBehaviourData
+    public interface IRunData : IMovementBehaviourData
     {
         float MaxSpeed { get; }
 

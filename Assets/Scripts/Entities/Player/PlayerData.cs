@@ -1,4 +1,5 @@
 ﻿using DashAttack.Gameplay.Behaviours.Interfaces.Datas;
+
 using UnityEngine;
 
 namespace DashAttack.Entities.Player
@@ -6,16 +7,14 @@ namespace DashAttack.Entities.Player
     [CreateAssetMenu(fileName = "Player", menuName = "Player")]
     public class PlayerData : ScriptableObject, IRunData, IFallData, IJumpData, IWallStickData, IWallJumpData
     {
-        [Header("Run Data")]
-        [SerializeField] private float maxSpeed;
+        [Header("Run Data")] [SerializeField] private float maxSpeed;
         [SerializeField] private float accelerationTime;
         [SerializeField] private float brakingTime;
         [SerializeField] private float turningTime;
         [SerializeField] private float airControlAmount;
         [SerializeField] private float wallStickTime;
 
-        [Header("Jump Data")]
-        [SerializeField] private float jumpHeight;
+        [Header("Jump Data")] [SerializeField] private float jumpHeight;
         [SerializeField] private float jumpDistance;
         [SerializeField] private float wallSlideMultiplier;
         [SerializeField] private float wallClimbMultiplier;
@@ -56,36 +55,36 @@ namespace DashAttack.Entities.Player
         public float WallStickTime
         {
             get => wallStickTime;
-            set => wallStickTime = Mathf.Clamp(value, 0, int.MaxValue);
+            private set => wallStickTime = Mathf.Clamp(value, 0, int.MaxValue);
         }
 
         // ========== JUMP PROPERTIES ==========
 
-        public float JumpHeight
+        private float JumpHeight
         {
             get => jumpHeight;
-            private set => jumpHeight = Mathf.Clamp(value, 1, int.MaxValue);
+            set => jumpHeight = Mathf.Clamp(value, 1, int.MaxValue);
         }
 
-        public float JumpDistance
+        private float JumpDistance
         {
             get => jumpDistance;
-            private set => jumpDistance = Mathf.Clamp(value, 1, int.MaxValue);
+            set => jumpDistance = Mathf.Clamp(value, 1, int.MaxValue);
         }
 
         public float WallSlideMultiplier
         {
             get => wallSlideMultiplier;
-            set => wallSlideMultiplier = Mathf.Clamp(value, 0, 1);
+            private set => wallSlideMultiplier = Mathf.Clamp(value, 0, 1);
         }
 
         public float WallClimbMultiplier
         {
             get => wallClimbMultiplier;
-            set => wallClimbMultiplier = Mathf.Clamp(value, 0, 1);
+            private set => wallClimbMultiplier = Mathf.Clamp(value, 0, 1);
         }
 
-        public float WallJumpDistance
+        private float WallJumpDistance
         {
             get => wallJumpDistance;
             set => wallJumpDistance = value;
@@ -120,7 +119,7 @@ namespace DashAttack.Entities.Player
 
         private void ComputeJumpVelocity()
         {
-            var jumpTime = JumpDistance / MaxSpeed / 2;
+            float jumpTime = JumpDistance / MaxSpeed / 2;
 
             Gravity = 2 * JumpHeight / Mathf.Pow(jumpTime, 2);
             JumpVelocity = Gravity * jumpTime;
@@ -128,15 +127,20 @@ namespace DashAttack.Entities.Player
 
         private void ComputeWallJumpVelocity()
         {
-            var acceleration = MaxSpeed / AccelerationTime * AirControlAmount;
-            var accelerationTime = MaxSpeed / acceleration;
-            var distanceAccelerating = acceleration * Mathf.Pow(accelerationTime, 2) / 2;
+            float acceleration = MaxSpeed / AccelerationTime * AirControlAmount;
+            float timeAccelerating = MaxSpeed / acceleration;
+            float distanceAccelerating = acceleration * Mathf.Pow(timeAccelerating, 2) / 2;
 
-            var timeAtMaxSpeed = (WallJumpDistance - distanceAccelerating) / MaxSpeed;
-            var wallJumpTime = timeAtMaxSpeed + accelerationTime;
+            float timeAtMaxSpeed = (WallJumpDistance - distanceAccelerating) / MaxSpeed;
+            float wallJumpTime = timeAtMaxSpeed + timeAccelerating;
 
-            Deceleration = new(2 * WallJumpDistance / Mathf.Pow(wallJumpTime, 2), Gravity);
-            ImpulseVelocity = new(wallJumpTime * Deceleration.x, wallJumpTime * Gravity);
+            Deceleration = new Vector2(
+                2 * WallJumpDistance / Mathf.Pow(wallJumpTime, 2),
+                Gravity);
+
+            ImpulseVelocity = new Vector2(
+                wallJumpTime * Deceleration.x,
+                wallJumpTime * Gravity);
         }
     }
 }
