@@ -5,9 +5,11 @@
         float Gravity { get; }
 
         float JumpVelocity { get; }
-
-        float WallSlideMultiplier { get; }
-
+        
         float WallClimbMultiplier { get; }
+        
+        float EarlyJumpBuffer { get; }
+        
+        float LateJumpBuffer { get; }
     }
 }

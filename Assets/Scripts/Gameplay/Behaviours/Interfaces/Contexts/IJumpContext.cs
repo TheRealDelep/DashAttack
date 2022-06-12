@@ -2,8 +2,11 @@
 {
     public interface IJumpContext : IMovementBehaviourContext
     {
-        public bool JumpInput { get; }
+        bool JumpInput { get; }
 
-        public bool JumpInputDown { get; }
+        bool JumpInputDown { get; }
+        
+        float TimeSinceCollisionBelow { get; }
+        float TimeSinceJumpInputDown { get; }
     }
 }

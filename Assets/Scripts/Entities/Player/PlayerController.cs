@@ -4,6 +4,8 @@ using DashAttack.Gameplay.Behaviours.Concretes;
 using DashAttack.Gameplay.Behaviours.Enums;
 using DashAttack.Physics;
 
+using UnityEditor.Timeline;
+
 using UnityEngine;
 
 using static DashAttack.Gameplay.Behaviours.Enums.BehaviourState;
@@ -15,7 +17,7 @@ namespace DashAttack.Entities.Player
         [SerializeField] private PlayerData data;
 
         private float wallJumpDirection;
-        
+
         private PlayerContext context;
         private IPhysicsObject physicsObject;
 
@@ -39,8 +41,14 @@ namespace DashAttack.Entities.Player
 
         private void FixedUpdate()
         {
+            context.Update();
             UpdateBehaviours();
             physicsObject.Move(ComputeVelocity() * context.DeltaTime);
+        }
+
+        private void Update()
+        {
+            context.Update();
         }
 
         private Vector2 ComputeVelocity()
@@ -49,11 +57,11 @@ namespace DashAttack.Entities.Player
             {
                 return WallJump.Velocity;
             }
-            
+
             var verticalVel = Jump.CurrentState is Executing
                 ? Jump.Velocity
                 : Fall.Velocity;
-            
+
             return Run.Velocity + verticalVel;
         }
 
@@ -69,25 +77,23 @@ namespace DashAttack.Entities.Player
 
             WallJump.OnStateChange += (_, current) =>
             {
-                if (current is Rest)
-                {
-                    Fall.TransitionTo(Rest);
-
-                    Jump.TransitionTo(Executing);
-                    Jump.Velocity = new Vector2(0, data.AfterWallJumpVerticalVelocity);
-
-                    Run.Velocity = new Vector2(data.MaxSpeed * wallJumpDirection, 0);
-                    var nextRunState = Mathf.Sign(context.RunDirection) == -wallJumpDirection
-                        ? RunState.Turning
-                        : RunState.AtMaxSpeed; 
-                    
-                    Run.TransitionTo(nextRunState);
-                }
-
                 if (current is Executing)
                 {
                     wallJumpDirection = Mathf.Sign(WallJump.Velocity.x);
+                    return;
                 }
+
+                Fall.TransitionTo(Rest);
+
+                Jump.TransitionTo(Executing);
+                Jump.Velocity = new Vector2(0, data.AfterWallJumpVerticalVelocity);
+
+                Run.Velocity = new Vector2(data.MaxSpeed * wallJumpDirection, 0);
+                var nextRunState = Mathf.Sign(context.RunDirection) == -wallJumpDirection
+                    ? RunState.Turning
+                    : RunState.AtMaxSpeed;
+
+                Run.TransitionTo(nextRunState);
             };
         }
 

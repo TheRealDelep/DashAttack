@@ -17,6 +17,12 @@ namespace DashAttack.Gameplay.Behaviours.Concretes
             get => currentVelocity;
             set => currentVelocity = value;
         }
+        
+        private bool IsOnWall 
+            => Context.Collisions.Left || Context.Collisions.Right || Context.TimeSinceCollisionOnSide < Data.LateJumpBuffer;
+
+        private bool JumpInputDown
+            => Context.JumpInputDown || Context.TimeSinceJumpInputDown < Data.EarlyJumpBuffer;
 
         public WallJump(IWallJumpData data, IWallJumpContext context)
             : base(data, context)
@@ -35,7 +41,6 @@ namespace DashAttack.Gameplay.Behaviours.Concretes
         public override void UpdateState()
         {
             bool isGrounded = Context.Collisions.Bottom;
-            bool isOnWall = Context.Collisions.Left || Context.Collisions.Right;
 
             if (IsExecuting)
             {
@@ -47,7 +52,7 @@ namespace DashAttack.Gameplay.Behaviours.Concretes
                     IsExecuting = false;
                 }
             }
-            else if (Context.JumpInputDown && !isGrounded && isOnWall)
+            else if (JumpInputDown && !isGrounded && IsOnWall)
             {
                 IsExecuting = true;
             }

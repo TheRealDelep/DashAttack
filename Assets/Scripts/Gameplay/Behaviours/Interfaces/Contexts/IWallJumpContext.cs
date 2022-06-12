@@ -3,5 +3,8 @@
     public interface IWallJumpContext : IMovementBehaviourContext
     {
         bool JumpInputDown { get; }
+
+        float TimeSinceCollisionOnSide { get; }
+        float TimeSinceJumpInputDown { get; }
     }
 }

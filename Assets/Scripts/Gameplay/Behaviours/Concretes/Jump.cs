@@ -22,6 +22,12 @@ namespace DashAttack.Gameplay.Behaviours.Concretes
                 ? Data.WallClimbMultiplier
                 : 1;
 
+        private bool IsGrounded 
+            => Context.Collisions.Bottom || Context.TimeSinceCollisionBelow < Data.LateJumpBuffer;
+
+        private bool JumpInputDown
+            => Context.JumpInputDown || Context.TimeSinceJumpInputDown < Data.EarlyJumpBuffer;
+
         public Jump(IJumpData data, IJumpContext context)
             : base(data, context)
         {
@@ -38,7 +44,7 @@ namespace DashAttack.Gameplay.Behaviours.Concretes
                     IsExecuting = false;
                 }
             }
-            else if (Context.JumpInputDown && Context.Collisions.Bottom)
+            else if (JumpInputDown && IsGrounded)
             {
                 IsExecuting = true;
             }

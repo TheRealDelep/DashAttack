@@ -9,5 +9,9 @@ namespace DashAttack.Gameplay.Behaviours.Interfaces.Datas
         Vector2 WallJumpVelocity { get; }
 
         Vector2 WallJumpDeceleration { get; }
+        
+        float EarlyJumpBuffer { get; }
+        
+        float LateJumpBuffer { get; }
     }
 }

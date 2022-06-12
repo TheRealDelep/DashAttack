@@ -5,14 +5,13 @@ using UnityEngine;
 namespace DashAttack.Entities.Player
 {
     [CreateAssetMenu(fileName = "Player", menuName = "Player")]
-    public class PlayerData : ScriptableObject, IRunData, IFallData, IJumpData, IWallStickData, IWallJumpData
+    public class PlayerData : ScriptableObject, IRunData, IFallData, IJumpData, IWallJumpData
     {
         [Header("Run Data")][SerializeField] private float maxSpeed;
         [SerializeField] private float accelerationTime;
         [SerializeField] private float brakingTime;
         [SerializeField] private float turningTime;
         [SerializeField] private float airControlAmount;
-        [SerializeField] private float wallStickTime;
 
         [Header("Jump Data")][SerializeField] private float jumpHeight;
         [SerializeField] private float jumpDistance;
@@ -20,6 +19,8 @@ namespace DashAttack.Entities.Player
         [SerializeField] private float wallClimbMultiplier;
         [SerializeField] private float wallJumpDistance;
         [SerializeField] private float wallJumpHorizontalVelocity;
+        [SerializeField] private float earlyJumpBuffer;
+        [SerializeField] private float lateJumpBuffer;
         
         private Vector2 wallJumpVelocity;
 
@@ -55,25 +56,7 @@ namespace DashAttack.Entities.Player
             private set => airControlAmount = Mathf.Clamp(value, 0, 1);
         }
 
-        public float WallStickTime
-        {
-            get => wallStickTime;
-            private set => wallStickTime = Mathf.Clamp(value, 0, int.MaxValue);
-        }
-
         // ========== JUMP PROPERTIES ==========
-
-        private float JumpHeight
-        {
-            get => jumpHeight;
-            set => jumpHeight = Mathf.Clamp(value, 1, int.MaxValue);
-        }
-
-        private float JumpDistance
-        {
-            get => jumpDistance;
-            set => jumpDistance = Mathf.Clamp(value, 1, int.MaxValue);
-        }
 
         public float WallSlideMultiplier
         {
@@ -87,27 +70,51 @@ namespace DashAttack.Entities.Player
             private set => wallClimbMultiplier = Mathf.Clamp(value, 0, 1);
         }
 
-        private float WallJumpDistance
+        public float EarlyJumpBuffer
         {
-            get => wallJumpDistance;
-            set => wallJumpDistance = value;
+            get => earlyJumpBuffer;
+            set => earlyJumpBuffer = Mathf.Clamp(value, 0, Mathf.Infinity);
         }
-
+        
+        public float LateJumpBuffer
+        {
+            get => lateJumpBuffer;
+            set => lateJumpBuffer = Mathf.Clamp(value, 0, Mathf.Infinity);
+        }
+        
         public float JumpVelocity { get; private set; }
 
         public float Gravity { get; private set; }
 
         public Vector2 WallJumpVelocity { get; private set; }
 
+        public Vector2 WallJumpDeceleration { get; private set; }
+        
+        public float AfterWallJumpVerticalVelocity { get; private set; }
+        
+        private float JumpHeight
+        {
+            get => jumpHeight;
+            set => jumpHeight = Mathf.Clamp(value, 1, int.MaxValue);
+        }
+
+        private float JumpDistance
+        {
+            get => jumpDistance;
+            set => jumpDistance = Mathf.Clamp(value, 1, int.MaxValue);
+        }
+
+        private float WallJumpDistance
+        {
+            get => wallJumpDistance;
+            set => wallJumpDistance = value;
+        }
+        
         private float WallJumpHorizontalVelocity
         {
             get => wallJumpHorizontalVelocity;
             set => wallJumpHorizontalVelocity = Mathf.Clamp(value, MaxSpeed * 2, MaxSpeed * 5);
         }
-
-        public Vector2 WallJumpDeceleration { get; private set; }
-        
-        public float AfterWallJumpVerticalVelocity { get; private set; }
 
         private void OnValidate()
         {
@@ -119,11 +126,12 @@ namespace DashAttack.Entities.Player
 
             JumpHeight = jumpHeight;
             JumpDistance = jumpDistance;
-            WallStickTime = wallStickTime;
             WallSlideMultiplier = wallSlideMultiplier;
             WallClimbMultiplier = wallClimbMultiplier;
             WallJumpDistance = wallJumpDistance;
             WallJumpHorizontalVelocity = wallJumpHorizontalVelocity;
+            EarlyJumpBuffer = earlyJumpBuffer;
+            LateJumpBuffer = lateJumpBuffer;
 
             ComputeJumpVelocity();
             ComputeWallJumpVelocity();
