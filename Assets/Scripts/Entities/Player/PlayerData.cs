@@ -7,14 +7,14 @@ namespace DashAttack.Entities.Player
     [CreateAssetMenu(fileName = "Player", menuName = "Player")]
     public class PlayerData : ScriptableObject, IRunData, IFallData, IJumpData, IWallStickData, IWallJumpData
     {
-        [Header("Run Data")] [SerializeField] private float maxSpeed;
+        [Header("Run Data")][SerializeField] private float maxSpeed;
         [SerializeField] private float accelerationTime;
         [SerializeField] private float brakingTime;
         [SerializeField] private float turningTime;
         [SerializeField] private float airControlAmount;
         [SerializeField] private float wallStickTime;
 
-        [Header("Jump Data")] [SerializeField] private float jumpHeight;
+        [Header("Jump Data")][SerializeField] private float jumpHeight;
         [SerializeField] private float jumpDistance;
         [SerializeField] private float wallSlideMultiplier;
         [SerializeField] private float wallClimbMultiplier;
@@ -94,9 +94,9 @@ namespace DashAttack.Entities.Player
 
         public float Gravity { get; private set; }
 
-        public Vector2 ImpulseVelocity { get; private set; }
+        public Vector2 WallJumpVelocity { get; private set; }
 
-        public Vector2 Deceleration { get; private set; }
+        public Vector2 WallJumpDeceleration { get; private set; }
 
         private void OnValidate()
         {
@@ -127,20 +127,18 @@ namespace DashAttack.Entities.Player
 
         private void ComputeWallJumpVelocity()
         {
-            float acceleration = MaxSpeed / AccelerationTime * AirControlAmount;
-            float timeAccelerating = MaxSpeed / acceleration;
-            float distanceAccelerating = acceleration * Mathf.Pow(timeAccelerating, 2) / 2;
+            float turningForce = MaxSpeed / TurningTime * AirControlAmount;
+            float timeTurning = MaxSpeed / turningForce;
+            float distanceTurning = turningForce * Mathf.Pow(timeTurning, 2) / 2;
 
-            float timeAtMaxSpeed = (WallJumpDistance - distanceAccelerating) / MaxSpeed;
-            float wallJumpTime = timeAtMaxSpeed + timeAccelerating;
+            float wallJumpingDistance = WallJumpDistance - distanceTurning;
+            float horizontalVelocity = MaxSpeed * 1.5f;
+            float wallJumpingTime = wallJumpingDistance / ((MaxSpeed + horizontalVelocity) / 2);
 
-            Deceleration = new Vector2(
-                2 * WallJumpDistance / Mathf.Pow(wallJumpTime, 2),
-                Gravity);
-
-            ImpulseVelocity = new Vector2(
-                wallJumpTime * Deceleration.x,
-                wallJumpTime * Gravity);
+            float horizontalDeceleration = (horizontalVelocity - MaxSpeed) / wallJumpingTime;
+            
+            WallJumpVelocity = new Vector2(horizontalVelocity, 0);
+            WallJumpDeceleration = new Vector2(horizontalDeceleration, 0);
         }
     }
 }

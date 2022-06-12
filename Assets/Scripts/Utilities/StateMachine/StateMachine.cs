@@ -11,6 +11,8 @@ namespace DashAttack.Utilities.StateMachine
         private event Action AfterStateUpdate;
         private event Action BeforeStateUpdate;
 
+        public event Action<TStateEnum, TStateEnum> OnStateChange;
+
         private Dictionary<TStateEnum, State<TStateEnum>> states = new();
 
         public TStateEnum CurrentState { get; private set; }
@@ -65,6 +67,9 @@ namespace DashAttack.Utilities.StateMachine
             CurrentState = nextState;
 
             states[CurrentState].OnStateEnter();
+            
+            OnStateChange?.Invoke(PreviousState, CurrentState);
+            
             states[CurrentState].OnStateUpdate();
         }
 

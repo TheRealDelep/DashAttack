@@ -22,7 +22,7 @@ namespace DashAttack.Gameplay.Behaviours.Concretes
         protected override void OnBehaviourStart()
         {
             direction = Context.Collisions.Left ? 1 : -1;
-            currentVelocity = new Vector2(Data.ImpulseVelocity.x * direction, Data.ImpulseVelocity.y);
+            currentVelocity = new Vector2(Data.WallJumpVelocity.x * direction, Data.WallJumpVelocity.y);
         }
 
         protected override void OnBehaviourEnd()
@@ -35,10 +35,10 @@ namespace DashAttack.Gameplay.Behaviours.Concretes
 
             if (IsExecuting)
             {
-                Vector2 deceleration = new(Data.Deceleration.x * direction, Data.Deceleration.y);
+                Vector2 deceleration = new(Data.WallJumpDeceleration.x * direction, Data.WallJumpDeceleration.y);
                 currentVelocity -= deceleration * Context.DeltaTime;
 
-                if (currentVelocity.x * -direction >= 0)
+                if (Mathf.Abs(currentVelocity.x) <= Data.MaxSpeed + 0.0001f)
                 {
                     IsExecuting = false;
                 }

@@ -17,9 +17,13 @@ namespace DashAttack.Gameplay.Behaviours
 
         private readonly StateMachine<TState> stateMachine;
 
-        public event Action<TState, TState> OnStateChange;
+        public event Action<TState, TState> OnStateChange
+        {
+            add => stateMachine.OnStateChange += value;
+            remove => stateMachine.OnStateChange -= value;
+        }
 
-        public abstract Vector2 Velocity { get; }
+        public abstract Vector2 Velocity { get; set; }
 
         public TState CurrentState => stateMachine.CurrentState;
         public TState PreviousState => stateMachine.PreviousState;
@@ -32,15 +36,10 @@ namespace DashAttack.Gameplay.Behaviours
         }
 
         public void TransitionTo(TState nextState)
-        {
-            stateMachine.TransitionTo(nextState);
-            OnStateChange?.Invoke(PreviousState, CurrentState);
-        }
+            => stateMachine.TransitionTo(nextState);
 
         public void UpdateState()
-        {
-            stateMachine.RunMachine();
-        }
+            => stateMachine.RunMachine();
 
         public void AddState(
             TState state,

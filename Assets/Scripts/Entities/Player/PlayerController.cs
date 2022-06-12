@@ -1,6 +1,7 @@
 ﻿using System;
 
 using DashAttack.Gameplay.Behaviours.Concretes;
+using DashAttack.Gameplay.Behaviours.Enums;
 using DashAttack.Physics;
 
 using UnityEngine;
@@ -72,6 +73,18 @@ namespace DashAttack.Entities.Player
                 {
                     Jump.TransitionTo(Rest);
                     Fall.TransitionTo(Rest);
+
+                    Run.Velocity = new Vector2(data.MaxSpeed * wallJumpDirection, 0);
+                    var nextRunState = Mathf.Sign(context.RunDirection) == -wallJumpDirection
+                        ? RunState.Turning
+                        : RunState.AtMaxSpeed; 
+                    
+                    Run.TransitionTo(nextRunState);
+                }
+
+                if (current is Executing)
+                {
+                    wallJumpDirection = Mathf.Sign(WallJump.Velocity.x);
                 }
             };
         }

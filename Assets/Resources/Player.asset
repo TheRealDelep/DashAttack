@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: Player
   m_EditorClassIdentifier: 
   maxSpeed: 10
-  accelerationTime: 0.25
+  accelerationTime: 0.5
   brakingTime: 0.2
-  turningTime: 0.15
-  airControlAmount: 0.8
+  turningTime: 0.2
+  airControlAmount: 1
   wallStickTime: 0.1
   jumpHeight: 5
   jumpDistance: 10
   wallSlideMultiplier: 0.3
   wallClimbMultiplier: 0.8
-  wallJumpDistance: 2
+  wallJumpDistance: 5
