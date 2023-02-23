@@ -89,6 +89,7 @@ namespace DashAttack.Gameplay.Behaviours.Concretes
 
             if (Mathf.Sign(Context.HorizontalVelocity) != Mathf.Sign(Context.LastFrameHorizontalVelocity))
             {
+                Context.HorizontalVelocity = 0;
                 TransitionTo(Rest);
             }
         }
@@ -98,19 +99,22 @@ namespace DashAttack.Gameplay.Behaviours.Concretes
 
         private void OnTurningUpdate()
         {
-            RunState? nextState = Context.RunInputDirection switch
+            if (Context.RunInputDirection is None)
             {
-                None => Braking,
-                _ when Context.RunInputDirection == Context.LastFrameRunInputDirection
-                    && Context.LastFrameRunInputDirection != 0
-                    && !isTurningFrame => Accelerating,
-                _ => null
-            };
-
-            if (nextState.HasValue)
-            {
-                TransitionTo(nextState.Value);
+                TransitionTo(Braking);
                 return;
+            }
+            else
+            {
+                var currentDirection = Context.HorizontalVelocity == 0
+                    ? Context.LastFrameHorizontalVelocity > 0 ? Left : Right
+                    : Context.HorizontalVelocity > 0 ? Right : Left;
+
+                if (!isTurningFrame && currentDirection == Context.RunInputDirection)
+                {
+                    TransitionTo(Accelerating);
+                    return;
+                }
             }
 
             Context.HorizontalVelocity += Data.MaxSpeed / Data.TurningTime * Context.RunInputDirection.ToInt() * AerialMod * Context.DeltaTime;

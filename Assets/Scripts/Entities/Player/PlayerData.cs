@@ -147,20 +147,7 @@ namespace DashAttack.Entities.Player
 
         private void ComputeWallJumpVelocity()
         {
-            float turningForce = MaxSpeed / TurningTime * AirControlAmount;
-            float timeTurning = MaxSpeed / turningForce;
-            float distanceTurning = turningForce * Mathf.Pow(timeTurning, 2) / 2;
 
-            float travelBackTime = timeTurning + ((WallJumpDistance - distanceTurning) / MaxSpeed);
-            float wallJumpHeight = (Gravity * Mathf.Pow(travelBackTime, 2)) / 2;
-
-            var wallJumpingTime = Mathf.Sqrt((2 * WallJumpDistance) / turningForce);
-
-            WallJumpDeceleration = new Vector2(
-                0,
-                2 * wallJumpHeight / Mathf.Pow(WallJumpTime, 2));
-
-            WallJumpVelocity = new Vector2(turningForce, WallJumpDeceleration.y) * wallJumpingTime;
         }
     }
 }

@@ -15,7 +15,7 @@ MonoBehaviour:
   maxSpeed: 10
   accelerationTime: 0.25
   brakingTime: 0.2
-  turningTime: 0.12
+  turningTime: 0.1
   airControlAmount: 1
   jumpHeight: 5
   jumpDistance: 10

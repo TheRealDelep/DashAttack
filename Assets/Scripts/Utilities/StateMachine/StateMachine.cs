@@ -69,7 +69,6 @@ namespace DashAttack.Utilities.StateMachine
 
         public void TransitionTo(TStateEnum nextState)
         {
-            UnityEngine.Debug.Log($"Transition From {CurrentState} To {nextState}");
             PreviousState = CurrentState;
 
             states[CurrentState].OnStateLeave();

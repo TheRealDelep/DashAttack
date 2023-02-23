@@ -6,10 +6,7 @@ namespace DashAttack.Gameplay.Behaviours.Interfaces.Contexts
     {
         HorizontalDirection RunInputDirection { get; }
 
-        bool JumpInputDown { get; }
-
-        float TimeSinceCollisionOnSide { get; }
-
-        float TimeSinceJumpInputDown { get; }
+        float HorizontalVelocity { get; set; }
+        float VerticalVelocity { get; set; }
     }
 }
