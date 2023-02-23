@@ -22,23 +22,31 @@ namespace DashAttack.Utilities.StateMachine
         public TStateEnum EntryState { get; private set; }
 
         public void AddState(
-            TStateEnum stateEnum, 
+            TStateEnum stateEnum,
             Action onStateEnter = null,
             Action onStateUpdate = null,
             Action onStateLeave = null)
         {
-            if (states.ContainsKey(stateEnum))
-            {
-                throw new ArgumentException($"StateMachine already defines a state for type {stateEnum}");
-            }
+            AddState(new State<TStateEnum>(stateEnum), onStateEnter, onStateUpdate, onStateLeave);
+        }
 
-            var state = new State<TStateEnum>(stateEnum);
+        public void AddState<TState>(
+            TState state,
+            Action onStateEnter = null,
+            Action onStateUpdate = null,
+            Action onStateLeave = null)
+            where TState : State<TStateEnum>
+        {
+            if (states.ContainsKey(state.Type))
+            {
+                throw new ArgumentException($"StateMachine already defines a state for type {state.Type}");
+            }
 
             state.StateEntered += onStateEnter;
             state.StateLeft += onStateLeave;
             state.StateUpdated += onStateUpdate;
 
-            states.Add(stateEnum, state);
+            states.Add(state.Type, state);
         }
 
         public void Start(TStateEnum entryState)
@@ -61,15 +69,16 @@ namespace DashAttack.Utilities.StateMachine
 
         public void TransitionTo(TStateEnum nextState)
         {
+            UnityEngine.Debug.Log($"Transition From {CurrentState} To {nextState}");
             PreviousState = CurrentState;
 
             states[CurrentState].OnStateLeave();
             CurrentState = nextState;
 
             states[CurrentState].OnStateEnter();
-            
+
             OnStateChange?.Invoke(PreviousState, CurrentState);
-            
+
             states[CurrentState].OnStateUpdate();
         }
 
@@ -88,7 +97,7 @@ namespace DashAttack.Utilities.StateMachine
                 case OnUpdate:
                     states[state].StateUpdated += action;
                     break;
-                
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(stateEvent), stateEvent, null);
             }

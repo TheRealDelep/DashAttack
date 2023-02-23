@@ -1,7 +1,15 @@
-﻿namespace DashAttack.Gameplay.Behaviours.Interfaces.Contexts
+﻿using DashAttack.Utilities.Enums;
+
+namespace DashAttack.Gameplay.Behaviours.Interfaces.Contexts
 {
-    public interface IRunContext : IMovementBehaviourContext
+    public interface IRunContext : IBehaviourContext
     {
-        float RunDirection { get; }
+        float HorizontalVelocity { get; set; }
+
+        float LastFrameHorizontalVelocity { get; }
+
+        HorizontalDirection RunInputDirection { get; }
+
+        HorizontalDirection LastFrameRunInputDirection { get; }
     }
 }

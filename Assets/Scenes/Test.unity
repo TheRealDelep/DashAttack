@@ -1046,6 +1046,10 @@ PrefabInstance:
       propertyPath: data
       value: 
       objectReference: {fileID: 11400000, guid: 81a4fa82c5e02734e9ca623b08bddb31, type: 2}
+    - target: {fileID: 8529223610616358070, guid: 1ce5823cc58e2b444a140c0e1016e50b, type: 3}
+      propertyPath: drawDebugRays
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_AddedGameObjects: []
   m_SourcePrefab: {fileID: 100100000, guid: 1ce5823cc58e2b444a140c0e1016e50b, type: 3}

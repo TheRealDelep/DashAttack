@@ -2,7 +2,7 @@
 
 namespace DashAttack.Gameplay.Behaviours.Interfaces
 {
-    public interface IMovementBehaviourContext
+    public interface IBehaviourContext
     {
         float DeltaTime { get; }
 

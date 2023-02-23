@@ -1,8 +1,9 @@
 ﻿namespace DashAttack.Gameplay.Behaviours.Interfaces.Datas
 {
-    public interface IFallData : IMovementBehaviourData
+    public interface IFallData : IBehaviourData
     {
         float Gravity { get; }
+
         float WallSlideMultiplier { get; }
     }
 }

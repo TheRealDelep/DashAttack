@@ -1,49 +1,68 @@
-﻿using System;
-
+﻿using DashAttack.Assets.Scripts.Entities.Player.States;
+using DashAttack.Assets.Scripts.Gameplay.Behaviours.Interfaces;
+using DashAttack.Assets.Scripts.Utilities.StateMachine;
 using DashAttack.Gameplay.Behaviours.Concretes;
-using DashAttack.Gameplay.Behaviours.Enums;
 using DashAttack.Physics;
-
-using UnityEditor.Timeline;
+using DashAttack.Utilities.StateMachine;
 
 using UnityEngine;
 
-using static DashAttack.Gameplay.Behaviours.Enums.BehaviourState;
-
 namespace DashAttack.Entities.Player
 {
-    public class PlayerController : MonoBehaviour
+    public class PlayerController : MonoBehaviour, IStateMachine<PlayerStateEnum>
     {
         [SerializeField] private PlayerData data;
 
-        private float wallJumpDirection;
-
-        private PlayerContext context;
         private IPhysicsObject physicsObject;
+        private PlayerContext context;
+        private StateMachine<PlayerStateEnum> stateMachine;
 
         private Fall Fall { get; set; }
+
         private Jump Jump { get; set; }
+
         private Run Run { get; set; }
-        private WallJump WallJump { get; set; }
 
         private void Start()
         {
             physicsObject = GetComponent<IPhysicsObject>();
             context = new PlayerContext(physicsObject);
+            stateMachine = new();
 
-            Fall = new Fall(data, context);
-            Run = new Run(data, context);
-            Jump = new Jump(data, context);
-            WallJump = new WallJump(data, context);
+            Fall = new(data, context);
+            Jump = new(data, context);
+            Run = new(data, context);
 
-            SubscribeStates();
+            AddState(new PlayerIdleState(data, context, this), Fall);
+            AddState(new PlayerFallState(data, context, this), Fall);
+            AddState(new PlayerWallSlidingState(data, context, this), Fall);
+
+            AddState(new PlayerJumpingState(data, context, this), Jump);
+            AddState(new PlayerWallClimbingState(data, context, this), Jump);
+
+            // Constantly apply downward force to trigger ground detection
+            AddState(new PlayerRunningState(data, context, this), Fall, Run);
+            AddState(new PlayerRunningJumpingState(data, context, this), Jump, Run);
+            AddState(new PlayerRunningFallingState(data, context, this), Fall, Run);
+
+            stateMachine.Start(PlayerStateEnum.Idle);
         }
 
         private void FixedUpdate()
         {
-            context.Update();
-            UpdateBehaviours();
-            physicsObject.Move(ComputeVelocity() * context.DeltaTime);
+            if (context.Collisions.Left || context.Collisions.Right)
+            {
+                context.HorizontalVelocity = 0;
+            }
+
+            if (context.Collisions.Bottom || context.Collisions.Top)
+            {
+                context.VerticalVelocity = 0;
+            }
+
+            stateMachine.RunMachine();
+
+            physicsObject.Move(context.HorizontalVelocity * context.DeltaTime, context.VerticalVelocity * context.DeltaTime);
         }
 
         private void Update()
@@ -51,58 +70,19 @@ namespace DashAttack.Entities.Player
             context.Update();
         }
 
-        private Vector2 ComputeVelocity()
+        private void AddState(PlayerState state, params IBehaviour[] behaviours)
         {
-            if (WallJump.CurrentState is Executing)
+            foreach (var behaviour in behaviours)
             {
-                return WallJump.Velocity;
+                state.StateEntered += behaviour.Start;
+                state.StateUpdated += behaviour.Update;
+                state.StateLeft += behaviour.Stop;
             }
 
-            var verticalVel = Jump.CurrentState is Executing
-                ? Jump.Velocity
-                : Fall.Velocity;
-
-            return Run.Velocity + verticalVel;
+            stateMachine.AddState(state);
         }
 
-        private void SubscribeStates()
-        {
-            Jump.OnStateChange += (_, current) =>
-            {
-                if (current is Rest)
-                {
-                    Fall.TransitionTo(Rest);
-                }
-            };
-
-            WallJump.OnStateChange += (_, current) =>
-            {
-                if (current is Executing)
-                {
-                    wallJumpDirection = Mathf.Sign(WallJump.Velocity.x);
-                    return;
-                }
-
-                Fall.TransitionTo(Rest);
-
-                Jump.TransitionTo(Executing);
-                Jump.Velocity = new Vector2(0, data.AfterWallJumpVerticalVelocity);
-
-                Run.Velocity = new Vector2(data.MaxSpeed * wallJumpDirection, 0);
-                var nextRunState = Mathf.Sign(context.RunDirection) == -wallJumpDirection
-                    ? RunState.Turning
-                    : RunState.AtMaxSpeed;
-
-                Run.TransitionTo(nextRunState);
-            };
-        }
-
-        private void UpdateBehaviours()
-        {
-            Fall.UpdateState();
-            Jump.UpdateState();
-            Run.UpdateState();
-            WallJump.UpdateState();
-        }
+        public void TransitionTo(PlayerStateEnum nextState)
+            => stateMachine.TransitionTo(nextState);
     }
 }
