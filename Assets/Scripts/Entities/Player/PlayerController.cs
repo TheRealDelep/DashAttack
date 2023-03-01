@@ -1,6 +1,7 @@
 ﻿using DashAttack.Assets.Scripts.Entities.Player.States;
 using DashAttack.Assets.Scripts.Gameplay.Behaviours.Interfaces;
 using DashAttack.Assets.Scripts.Utilities.StateMachine;
+using DashAttack.Entities.Player.States;
 using DashAttack.Gameplay.Behaviours.Concretes;
 using DashAttack.Physics;
 using DashAttack.Utilities.StateMachine;
@@ -23,6 +24,8 @@ namespace DashAttack.Entities.Player
 
         private Run Run { get; set; }
 
+        private WallJump WallJump { get; set; }
+
         private void Start()
         {
             physicsObject = GetComponent<IPhysicsObject>();
@@ -32,6 +35,7 @@ namespace DashAttack.Entities.Player
             Fall = new(data, context);
             Jump = new(data, context);
             Run = new(data, context);
+            WallJump = new(data, context);
 
             AddState(new PlayerIdleState(data, context, this), Fall);
             AddState(new PlayerFallState(data, context, this), Fall);
@@ -44,6 +48,8 @@ namespace DashAttack.Entities.Player
             AddState(new PlayerRunningState(data, context, this), Fall, Run);
             AddState(new PlayerRunningJumpingState(data, context, this), Jump, Run);
             AddState(new PlayerRunningFallingState(data, context, this), Fall, Run);
+
+            AddState(new PlayerWallJumpingState(data, context, this), WallJump);
 
             stateMachine.Start(PlayerStateEnum.Idle);
         }

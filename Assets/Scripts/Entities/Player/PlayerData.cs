@@ -147,7 +147,31 @@ namespace DashAttack.Entities.Player
 
         private void ComputeWallJumpVelocity()
         {
+            float fallBackTime = ComputeFallBackTime();
+            float wallJumpTime = ComputeWallJumpTime(fallBackTime);
 
+            WallJumpDeceleration = new Vector2(
+                2 * (WallJumpDistance / Mathf.Pow(wallJumpTime, 2)),
+                Gravity);
+
+            WallJumpVelocity = WallJumpDeceleration * wallJumpTime;
+        }
+
+        private float ComputeWallJumpTime(float fallBackTime)
+        {
+            var jumpHeight = (Gravity * Mathf.Pow(fallBackTime, 2)) / 2;
+            var wallJumpTime = Mathf.Sqrt(2 * jumpHeight / Gravity);
+            return wallJumpTime;
+        }
+
+        private float ComputeFallBackTime()
+        {
+            var accelerationForce = (MaxSpeed / AccelerationTime) * AirControlAmount;
+            var distanceAccelerating = (accelerationForce * Mathf.Pow(AccelerationTime, 2)) / 2;
+            var timeAtMaxSpeed = (WallJumpDistance - distanceAccelerating) / MaxSpeed;
+
+            var fallBackTime = accelerationTime + timeAtMaxSpeed;
+            return fallBackTime;
         }
     }
 }
