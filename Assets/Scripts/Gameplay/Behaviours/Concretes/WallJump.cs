@@ -14,11 +14,9 @@ namespace DashAttack.Gameplay.Behaviours.Concretes
 
         public override void Start()
         {
-            base.Start();
-            Context.HorizontalVelocity = Context.RunInputDirection == HorizontalDirection.Right ? -1 : 1 * Data.WallJumpVelocity.x;
+            Context.HorizontalVelocity = (Context.RunInputDirection == HorizontalDirection.Right ? -1 : 1) * Data.WallJumpVelocity.x;
             Context.HorizontalVelocity += Data.WallJumpDeceleration.x * Mathf.Sign(Context.HorizontalVelocity) * Context.DeltaTime / 2;
             Context.VerticalVelocity = Data.WallJumpVelocity.y;
-            Context.VerticalVelocity += Data.WallJumpDeceleration.y * Context.DeltaTime / 2;
         }
 
         public override void Update()

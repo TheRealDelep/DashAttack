@@ -12,9 +12,6 @@ namespace DashAttack.Assets.Scripts.Entities.Player.States
         {
         }
 
-        private bool CanJump
-            => Context.Collisions.Bottom || Context.TimeSinceCollisionBelow < Data.LateJumpBuffer;
-
         public override void OnStateUpdate()
         {
             if (!Context.Collisions.Bottom)
@@ -29,7 +26,8 @@ namespace DashAttack.Assets.Scripts.Entities.Player.States
                 return;
             }
 
-            if (Context.JumpInputDown && CanJump)
+            var jumpRequested = Context.JumpInputDown || Context.TimeSinceJumpInputDown < Data.LateJumpBuffer;
+            if (Context.Collisions.Bottom && jumpRequested)
             {
                 StateMachine.TransitionTo(Jumping);
                 return;

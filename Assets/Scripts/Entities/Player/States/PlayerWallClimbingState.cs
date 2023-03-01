@@ -17,8 +17,8 @@ namespace DashAttack.Assets.Scripts.Entities.Player.States
 
         public override void OnStateUpdate()
         {
-            var hasCollisionOnSide = !Context.Collisions.Right && !Context.Collisions.Left;
-            if (hasCollisionOnSide || Context.RunInputDirection == HorizontalDirection.None)
+            var hasCollisionOnSide = Context.Collisions.Right || Context.Collisions.Left;
+            if (!hasCollisionOnSide || Context.RunInputDirection == HorizontalDirection.None)
             {
                 StateMachine.TransitionTo(Jumping);
                 return;
@@ -42,7 +42,8 @@ namespace DashAttack.Assets.Scripts.Entities.Player.States
                 return;
             }
 
-            if (Context.JumpInputDown && Context.TimeSinceCollisionOnSide < Data.LateJumpBuffer)
+            var jumpRequested = Context.JumpInputDown || Context.TimeSinceJumpInputDown < Data.LateJumpBuffer;
+            if (jumpRequested)
             {
                 StateMachine.TransitionTo(WallJumping);
                 return;

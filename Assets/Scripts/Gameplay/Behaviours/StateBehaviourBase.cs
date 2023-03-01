@@ -14,7 +14,7 @@ namespace DashAttack.Gameplay.Behaviours
         protected TData Data;
         protected TContext Context;
 
-        private readonly StateMachine<TState> stateMachine;
+        protected readonly StateMachine<TState> stateMachine;
 
         protected abstract TState EntryState { get; }
 

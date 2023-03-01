@@ -13,6 +13,7 @@ namespace DashAttack.Entities.Player
     public class PlayerController : MonoBehaviour, IStateMachine<PlayerStateEnum>
     {
         [SerializeField] private PlayerData data;
+        [SerializeField] private bool logStateTransitions;
 
         private IPhysicsObject physicsObject;
         private PlayerContext context;
@@ -31,6 +32,7 @@ namespace DashAttack.Entities.Player
             physicsObject = GetComponent<IPhysicsObject>();
             context = new PlayerContext(physicsObject);
             stateMachine = new();
+            stateMachine.LogTransition = logStateTransitions;
 
             Fall = new(data, context);
             Jump = new(data, context);
@@ -56,18 +58,12 @@ namespace DashAttack.Entities.Player
 
         private void FixedUpdate()
         {
-            if (context.Collisions.Left || context.Collisions.Right)
-            {
-                context.HorizontalVelocity = 0;
-            }
-
             if (context.Collisions.Bottom || context.Collisions.Top)
             {
                 context.VerticalVelocity = 0;
             }
 
             stateMachine.RunMachine();
-
             physicsObject.Move(context.HorizontalVelocity * context.DeltaTime, context.VerticalVelocity * context.DeltaTime);
         }
 

@@ -39,7 +39,8 @@ namespace DashAttack.Assets.Scripts.Entities.Player.States
                 return;
             }
 
-            if (Context.JumpInputDown && Context.TimeSinceCollisionOnSide < Data.LateJumpBuffer)
+            var jumpRequested = Context.JumpInputDown || Context.TimeSinceJumpInputDown < Data.LateJumpBuffer;
+            if (jumpRequested)
             {
                 StateMachine.TransitionTo(WallJumping);
                 return;

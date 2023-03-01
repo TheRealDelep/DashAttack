@@ -21,6 +21,8 @@ namespace DashAttack.Utilities.StateMachine
 
         public TStateEnum EntryState { get; private set; }
 
+        public bool LogTransition { get; set; }
+
         public void AddState(
             TStateEnum stateEnum,
             Action onStateEnter = null,
@@ -69,6 +71,13 @@ namespace DashAttack.Utilities.StateMachine
 
         public void TransitionTo(TStateEnum nextState)
         {
+#if DEBUG
+            if (LogTransition)
+            {
+                UnityEngine.Debug.Log($"Transition from {CurrentState} to {nextState}");
+            }
+#endif
+
             PreviousState = CurrentState;
 
             states[CurrentState].OnStateLeave();

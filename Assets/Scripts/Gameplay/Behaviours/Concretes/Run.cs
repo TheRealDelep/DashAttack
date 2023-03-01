@@ -33,6 +33,16 @@ namespace DashAttack.Gameplay.Behaviours.Concretes
             AddState(Braking, onStateUpdate: OnBrakingUpdate);
             AddState(Turning, onStateEnter: OnTurningEnter, onStateUpdate: OnTurningUpdate);
             AddState(AtMaxSpeed, onStateUpdate: OnMaxSpeedUpdate);
+
+            stateMachine.SubscribeBeforeUpdate(() =>
+            {
+                if (Context.Collisions.Left || Context.Collisions.Right)
+                {
+                    Context.HorizontalVelocity = 0;
+                }
+            });
+
+            stateMachine.LogTransition = false;
         }
 
         private void OnRestEnter()
@@ -126,7 +136,7 @@ namespace DashAttack.Gameplay.Behaviours.Concretes
             RunState? nextState = Context.RunInputDirection switch
             {
                 None => Braking,
-                _ when !Context.RunInputDirection.IsEqual(Context.HorizontalVelocity) => Turning,
+                _ when Context.LastFrameRunInputDirection != Context.RunInputDirection => Turning,
                 _ when Mathf.Abs(Context.HorizontalVelocity) < Data.MaxSpeed => Accelerating,
                 _ => null
             };
