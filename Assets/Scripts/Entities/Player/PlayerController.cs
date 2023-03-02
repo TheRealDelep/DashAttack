@@ -5,7 +5,7 @@ using DashAttack.Entities.Player.States;
 using DashAttack.Gameplay.Behaviours.Concretes;
 using DashAttack.Physics;
 using DashAttack.Utilities.StateMachine;
-
+using System;
 using UnityEngine;
 
 namespace DashAttack.Entities.Player
@@ -26,6 +26,11 @@ namespace DashAttack.Entities.Player
         private Run Run { get; set; }
 
         private WallJump WallJump { get; set; }
+
+        public void Subscribe(PlayerStateEnum state, StateEvent stateEvent, Action callBack)
+        {
+            stateMachine.Subscribe(state, stateEvent, callBack);
+        }
 
         private void Start()
         {
