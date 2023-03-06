@@ -12,6 +12,7 @@ namespace DashAttack.Managers
         public static InputManager Instance { get; private set; }
 
         public float Move { get; private set; }
+        public float LastFixedFrameMove { get; private set; }
 
         public bool Jump { get; private set; }
 
@@ -33,6 +34,15 @@ namespace DashAttack.Managers
             actions = new InputActions();
         }
 
+        private void Start()
+        {
+            PhysicsManager.EndOfFixedFrame += () =>
+            {
+                LastFixedFrameMove = Move;
+                lastFixedFrameJump = Jump;
+            };
+        }
+
         private void Update()
         {
             Move = actions.Default.Move.ReadValue<float>();
@@ -43,8 +53,6 @@ namespace DashAttack.Managers
         {
             JumpPressedThisFixedFrame = Jump && !lastFixedFrameJump;
             JumpReleasedThisFixedFrame = lastFixedFrameJump && !Jump;
-
-            lastFixedFrameJump = Jump;
         }
 
         private void OnEnable()

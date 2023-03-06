@@ -3,6 +3,7 @@ using DashAttack.Assets.Scripts.Gameplay.Behaviours.Interfaces;
 using DashAttack.Assets.Scripts.Utilities.StateMachine;
 using DashAttack.Entities.Player.States;
 using DashAttack.Gameplay.Behaviours.Concretes;
+using DashAttack.Gameplay.Behaviours.Enums;
 using DashAttack.Physics;
 using DashAttack.Utilities.StateMachine;
 using System;
@@ -30,6 +31,11 @@ namespace DashAttack.Entities.Player
         public void Subscribe(PlayerStateEnum state, StateEvent stateEvent, Action callBack)
         {
             stateMachine.Subscribe(state, stateEvent, callBack);
+        }
+
+        public void SubscribeRun(RunState state, StateEvent stateEvent, Action callBack)
+        {
+            Run.Subscribe(state, stateEvent, callBack);
         }
 
         private void Start()

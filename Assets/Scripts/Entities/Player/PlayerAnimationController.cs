@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-using static DashAttack.Entities.Player.PlayerStateEnum;
+using static DashAttack.Gameplay.Behaviours.Enums.RunState;
 using static DashAttack.Utilities.StateMachine.StateEvent;
 
 namespace DashAttack.Entities.Player
@@ -21,8 +21,8 @@ namespace DashAttack.Entities.Player
         {
             material = GetComponent<SpriteRenderer>().material;
 
-            controller.Subscribe(Running, OnEnter, () => StartCoroutine(SquareToRound()));
-            controller.Subscribe(Running, OnLeave, () => StartCoroutine(RoundToSquare()));
+            controller.SubscribeRun(Accelerating, OnEnter, () => StartCoroutine(SquareToRound()));
+            controller.SubscribeRun(Braking, OnEnter, () => StartCoroutine(RoundToSquare()));
         }
 
         private IEnumerator SquareToRound()

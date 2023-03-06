@@ -53,6 +53,11 @@ namespace DashAttack.Gameplay.Behaviours
             stateMachine.AddState(state, onStateEnter, onStateUpdate, onStateLeave);
         }
 
+        public void Subscribe(TState state, StateEvent stateEvent, Action callBack)
+        {
+            stateMachine.Subscribe(state, stateEvent, callBack);
+        }
+
         protected abstract void InitStates();
     }
 }

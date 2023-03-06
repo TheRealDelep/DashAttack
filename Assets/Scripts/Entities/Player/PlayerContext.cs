@@ -2,6 +2,7 @@
 using DashAttack.Managers;
 using DashAttack.Physics;
 using DashAttack.Utilities.Enums;
+
 using UnityEngine;
 
 namespace DashAttack.Entities.Player
@@ -21,7 +22,7 @@ namespace DashAttack.Entities.Player
 
         public HorizontalDirection RunInputDirection => InputManager.Instance.Move.ToHorizontalDirection();
 
-        public HorizontalDirection LastFrameRunInputDirection { get; private set; }
+        public HorizontalDirection LastFixedFrameRunInputDirection => InputManager.Instance.LastFixedFrameMove.ToHorizontalDirection();
 
         public float TimeSinceRunInput { get; private set; }
 
@@ -50,7 +51,6 @@ namespace DashAttack.Entities.Player
             TimeSinceCollisionOnSide += DeltaTime;
 
             LastFrameHorizontalVelocity = HorizontalVelocity;
-            LastFrameRunInputDirection = RunInputDirection;
 
             if (JumpInputDown)
             {

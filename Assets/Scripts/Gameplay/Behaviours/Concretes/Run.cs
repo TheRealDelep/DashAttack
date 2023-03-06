@@ -41,8 +41,6 @@ namespace DashAttack.Gameplay.Behaviours.Concretes
                     Context.HorizontalVelocity = 0;
                 }
             });
-
-            stateMachine.LogTransition = false;
         }
 
         private void OnRestEnter()
@@ -63,8 +61,8 @@ namespace DashAttack.Gameplay.Behaviours.Concretes
             RunState? nextState = Context.RunInputDirection switch
             {
                 None => Braking,
-                _ when Context.RunInputDirection != Context.LastFrameRunInputDirection
-                    && Context.LastFrameRunInputDirection is not None
+                _ when Context.RunInputDirection != Context.LastFixedFrameRunInputDirection
+                    && Context.LastFixedFrameRunInputDirection is not None
                     && PreviousState != Turning => Turning,
                 _ when Mathf.Abs(Context.HorizontalVelocity) >= Data.MaxSpeed => AtMaxSpeed,
                 _ => null
@@ -136,7 +134,7 @@ namespace DashAttack.Gameplay.Behaviours.Concretes
             RunState? nextState = Context.RunInputDirection switch
             {
                 None => Braking,
-                _ when Context.LastFrameRunInputDirection != Context.RunInputDirection => Turning,
+                _ when Context.LastFixedFrameRunInputDirection != Context.RunInputDirection => Turning,
                 _ when Mathf.Abs(Context.HorizontalVelocity) < Data.MaxSpeed => Accelerating,
                 _ => null
             };

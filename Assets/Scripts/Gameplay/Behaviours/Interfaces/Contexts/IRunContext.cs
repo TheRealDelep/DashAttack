@@ -10,6 +10,6 @@ namespace DashAttack.Gameplay.Behaviours.Interfaces.Contexts
 
         HorizontalDirection RunInputDirection { get; }
 
-        HorizontalDirection LastFrameRunInputDirection { get; }
+        HorizontalDirection LastFixedFrameRunInputDirection { get; }
     }
 }
