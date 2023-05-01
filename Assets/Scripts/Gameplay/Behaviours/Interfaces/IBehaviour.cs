@@ -2,10 +2,6 @@
 {
     public interface IBehaviour
     {
-        void Start();
-
         void Update();
-
-        void Stop();
     }
 }

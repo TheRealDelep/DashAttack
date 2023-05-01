@@ -20,11 +20,5 @@ namespace DashAttack.Gameplay.Behaviours
 
         public virtual void Update()
         { }
-
-        public virtual void Start()
-        { }
-
-        public virtual void Stop()
-        { }
     }
 }

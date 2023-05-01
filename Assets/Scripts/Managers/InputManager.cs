@@ -1,5 +1,4 @@
-﻿using DashAttack.Externals.InputSystem;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace DashAttack.Managers
 {

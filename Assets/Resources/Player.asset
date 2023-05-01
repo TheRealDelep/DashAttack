@@ -15,13 +15,12 @@ MonoBehaviour:
   maxSpeed: 10
   accelerationTime: 0.25
   brakingTime: 0.2
-  turningTime: 0.1
-  airControlAmount: 1
+  turningTime: 0.15
+  airControlAmount: 0.5
   jumpHeight: 3.5
   jumpDistance: 7
   wallSlideMultiplier: 0.3
   wallClimbMultiplier: 1
-  wallJumpDistance: 2.5
-  wallJumpTime: 0.1
+  wallJumpDistance: 2
   earlyJumpBuffer: 0.2
   lateJumpBuffer: 0.2

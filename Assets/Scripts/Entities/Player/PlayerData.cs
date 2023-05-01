@@ -20,7 +20,6 @@ namespace DashAttack.Entities.Player
         [SerializeField] private float wallSlideMultiplier;
         [SerializeField] private float wallClimbMultiplier;
         [SerializeField] private float wallJumpDistance;
-        [SerializeField] private float wallJumpTime;
         [SerializeField] private float earlyJumpBuffer;
         [SerializeField] private float lateJumpBuffer;
 
@@ -110,12 +109,6 @@ namespace DashAttack.Entities.Player
             set => wallJumpDistance = value;
         }
 
-        private float WallJumpTime
-        {
-            get => wallJumpTime;
-            set => wallJumpTime = Mathf.Clamp(value, WallJumpDistance / (MaxSpeed * 5), WallJumpDistance / MaxSpeed);
-        }
-
         private void OnValidate()
         {
             MaxSpeed = maxSpeed;
@@ -129,7 +122,6 @@ namespace DashAttack.Entities.Player
             WallSlideMultiplier = wallSlideMultiplier;
             WallClimbMultiplier = wallClimbMultiplier;
             WallJumpDistance = wallJumpDistance;
-            WallJumpTime = wallJumpTime;
             EarlyJumpBuffer = earlyJumpBuffer;
             LateJumpBuffer = lateJumpBuffer;
 
@@ -166,11 +158,11 @@ namespace DashAttack.Entities.Player
 
         private float ComputeFallBackTime()
         {
-            var accelerationForce = (MaxSpeed / AccelerationTime) * AirControlAmount;
-            var distanceAccelerating = (accelerationForce * Mathf.Pow(AccelerationTime, 2)) / 2;
+            var accelerationForce = MaxSpeed / AccelerationTime * AirControlAmount;
+            var distanceAccelerating = accelerationForce * Mathf.Pow(AccelerationTime / AirControlAmount, 2) / 2;
             var timeAtMaxSpeed = (WallJumpDistance - distanceAccelerating) / MaxSpeed;
 
-            var fallBackTime = accelerationTime + timeAtMaxSpeed;
+            var fallBackTime = (accelerationTime / AirControlAmount) + timeAtMaxSpeed;
             return fallBackTime;
         }
     }

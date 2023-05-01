@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using DashAttack.Utilities.Enums;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace DashAttack.Physics
@@ -12,6 +14,9 @@ namespace DashAttack.Physics
         public bool Top { get; private set; }
 
         public bool Bottom { get; private set; }
+
+        public override string ToString()
+            => $"Left: {Left}, Right: {Right}, Top: {Top}, Bottom: {Bottom}";
 
         public CollisionInfos(bool left = false, bool right = false, bool top = false, bool bottom = false)
         {
@@ -30,21 +35,27 @@ namespace DashAttack.Physics
 
             foreach (var hit in hits)
             {
-                if (hit.normal == Vector2.right)
+                var horizontal = hit.normal.x.ToHorizontalDirection();
+                var vertical = hit.normal.y.ToVerticalDirection();
+
+                switch (horizontal)
                 {
-                    left = true;
+                    case HorizontalDirection.Left:
+                        right = true;
+                        break;
+                    case HorizontalDirection.Right:
+                        left = true;
+                        break;
                 }
-                else if (hit.normal == Vector2.left)
+
+                switch (vertical)
                 {
-                    right = true;
-                }
-                else if (hit.normal == Vector2.down)
-                {
-                    top = true;
-                }
-                else if (hit.normal == Vector2.up)
-                {
-                    bottom = true;
+                    case VerticalDirection.Down:
+                        top = true;
+                        break;
+                    case VerticalDirection.Up:
+                        bottom = true;
+                        break;
                 }
             }
 

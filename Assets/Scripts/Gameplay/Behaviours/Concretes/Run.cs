@@ -23,12 +23,12 @@ namespace DashAttack.Gameplay.Behaviours.Concretes
 
         private float AerialMod
             => Context.Collisions.Bottom
-                ? Data.AirControlAmount
-                : 1;
+                ? 1
+                : Data.AirControlAmount;
 
         protected override void InitStates()
         {
-            AddState(Rest, onStateEnter: OnRestEnter, onStateUpdate: OnRestUpdate);
+            AddState(Rest, onStateUpdate: OnRestUpdate);
             AddState(Accelerating, onStateUpdate: OnAcceleratingUpdate);
             AddState(Braking, onStateUpdate: OnBrakingUpdate);
             AddState(Turning, onStateEnter: OnTurningEnter, onStateUpdate: OnTurningUpdate);
@@ -39,13 +39,11 @@ namespace DashAttack.Gameplay.Behaviours.Concretes
                 if (Context.Collisions.Left || Context.Collisions.Right)
                 {
                     Context.HorizontalVelocity = 0;
+                    TransitionTo(Rest);
                 }
             });
-        }
 
-        private void OnRestEnter()
-        {
-            Context.HorizontalVelocity = 0;
+            stateMachine.LogTransitions = false;
         }
 
         private void OnRestUpdate()

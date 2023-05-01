@@ -1,6 +1,7 @@
 ﻿using DashAttack.Assets.Scripts.Entities.Player.States;
 using DashAttack.Assets.Scripts.Utilities.StateMachine;
 using DashAttack.Utilities.Enums;
+using UnityEngine;
 using static DashAttack.Entities.Player.PlayerStateEnum;
 
 namespace DashAttack.Entities.Player.States
@@ -14,17 +15,20 @@ namespace DashAttack.Entities.Player.States
 
         public override void OnStateUpdate()
         {
-            if (Context.VerticalVelocity <= 0 || Context.Collisions.Top)
+            if (Context.EndOfJump)
             {
                 StateMachine.TransitionTo(RunningFalling);
                 return;
             }
 
-            var sideCollision = Context.HorizontalVelocity.ToHorizontalDirection() == HorizontalDirection.Right
-                ? Context.Collisions.Right
-                : Context.Collisions.Left;
+            if (Mathf.Abs(Context.HorizontalVelocity) <= Data.MaxSpeed &&
+                (Context.RunInputDirection == Context.HorizontalVelocity.ToHorizontalDirection() ||
+                Context.RunInputDirection is HorizontalDirection.None))
+            {
+                StateMachine.TransitionTo(RunningJumping);
+            }
 
-            if (sideCollision)
+            if (Context.HasSideCollision)
             {
                 StateMachine.TransitionTo(WallClimbing);
                 return;

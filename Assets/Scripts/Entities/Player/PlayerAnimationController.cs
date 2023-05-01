@@ -17,15 +17,29 @@ namespace DashAttack.Entities.Player
         [SerializeField, Range(0, 1)] private float minRoundness;
         [SerializeField, Range(0, 1)] private float maxRoundness;
 
+        private IEnumerator currentCrt;
+
         private void Start()
         {
             material = GetComponent<SpriteRenderer>().material;
 
-            controller.SubscribeRun(Accelerating, OnEnter, () => StartCoroutine(SquareToRound()));
-            controller.SubscribeRun(Braking, OnEnter, () => StartCoroutine(RoundToSquare()));
+            controller.SubscribeRun(Accelerating, OnEnter, () => StartCRT(RoundingCrt()));
+            controller.SubscribeRun(Braking, OnEnter, () => StartCRT(SquaringCrt()));
+            controller.SubscribeRun(Rest, OnEnter, () => StartCRT(SquaringCrt()));
         }
 
-        private IEnumerator SquareToRound()
+        private void StartCRT(IEnumerator crt)
+        {
+            if (currentCrt is not null)
+            {
+                StopCoroutine(currentCrt);
+            }
+
+            currentCrt = crt;
+            StartCoroutine(currentCrt);
+        }
+
+        private IEnumerator RoundingCrt()
         {
 
             var currentRoundness = material.GetFloat("_Roundness");
@@ -40,7 +54,7 @@ namespace DashAttack.Entities.Player
             currentRoundness = maxRoundness;
         }
 
-        private IEnumerator RoundToSquare()
+        private IEnumerator SquaringCrt()
         {
             var currentRoundness = material.GetFloat("_Roundness");
 

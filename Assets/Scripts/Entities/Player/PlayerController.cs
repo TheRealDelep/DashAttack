@@ -1,13 +1,16 @@
 ﻿using DashAttack.Assets.Scripts.Entities.Player.States;
-using DashAttack.Assets.Scripts.Gameplay.Behaviours.Interfaces;
 using DashAttack.Assets.Scripts.Utilities.StateMachine;
 using DashAttack.Entities.Player.States;
 using DashAttack.Gameplay.Behaviours.Concretes;
 using DashAttack.Gameplay.Behaviours.Enums;
 using DashAttack.Physics;
+using DashAttack.Utilities.Enums;
 using DashAttack.Utilities.StateMachine;
 using System;
 using UnityEngine;
+
+using static DashAttack.Entities.Player.PlayerStateEnum;
+using static DashAttack.Utilities.StateMachine.StateEvent;
 
 namespace DashAttack.Entities.Player
 {
@@ -20,13 +23,14 @@ namespace DashAttack.Entities.Player
         private PlayerContext context;
         private StateMachine<PlayerStateEnum> stateMachine;
 
-        private Fall Fall { get; set; }
-
-        private Jump Jump { get; set; }
-
         private Run Run { get; set; }
 
-        private WallJump WallJump { get; set; }
+        private float DownwardForce => stateMachine.CurrentState switch
+        {
+            WallSliding => data.Gravity * data.WallSlideMultiplier,
+            WallClimbing => data.Gravity * data.WallClimbMultiplier,
+            _ => data.Gravity
+        };
 
         public void Subscribe(PlayerStateEnum state, StateEvent stateEvent, Action callBack)
         {
@@ -43,28 +47,26 @@ namespace DashAttack.Entities.Player
             physicsObject = GetComponent<IPhysicsObject>();
             context = new PlayerContext(physicsObject);
             stateMachine = new();
-            stateMachine.LogTransition = logStateTransitions;
+            stateMachine.LogTransitions = logStateTransitions;
 
-            Fall = new(data, context);
-            Jump = new(data, context);
             Run = new(data, context);
-            WallJump = new(data, context);
 
-            AddState(new PlayerIdleState(data, context, this), Fall);
-            AddState(new PlayerFallState(data, context, this), Fall);
-            AddState(new PlayerWallSlidingState(data, context, this), Fall);
+            stateMachine.AddState(new PlayerIdleState(data, context, this));
+            stateMachine.AddState(new PlayerFallState(data, context, this));
+            stateMachine.AddState(new PlayerWallSlidingState(data, context, this));
 
-            AddState(new PlayerJumpingState(data, context, this), Jump);
-            AddState(new PlayerWallClimbingState(data, context, this), Jump);
+            stateMachine.AddState(new PlayerJumpingState(data, context, this));
+            stateMachine.AddState(new PlayerWallClimbingState(data, context, this));
 
-            // Constantly apply downward force to trigger ground detection
-            AddState(new PlayerRunningState(data, context, this), Fall, Run);
-            AddState(new PlayerRunningJumpingState(data, context, this), Jump, Run);
-            AddState(new PlayerRunningFallingState(data, context, this), Fall, Run);
+            stateMachine.AddState(new PlayerRunningState(data, context, this));
+            stateMachine.AddState(new PlayerRunningJumpingState(data, context, this));
+            stateMachine.AddState(new PlayerRunningFallingState(data, context, this));
 
-            AddState(new PlayerWallJumpingState(data, context, this), WallJump);
+            stateMachine.AddState(new PlayerWallJumpingState(data, context, this));
 
-            stateMachine.Start(PlayerStateEnum.Idle);
+            stateMachine.Start(Idle);
+
+            SubscribeStates();
         }
 
         private void FixedUpdate()
@@ -75,24 +77,57 @@ namespace DashAttack.Entities.Player
             }
 
             stateMachine.RunMachine();
+
+            if (stateMachine.CurrentState is Running or RunningFalling or RunningJumping)
+            {
+                Run.Update();
+            }
+
+            if (stateMachine.CurrentState is WallJumping)
+            {
+                context.HorizontalVelocity -= data.WallJumpDeceleration.x * Mathf.Sign(context.HorizontalVelocity) * context.DeltaTime;
+                context.VerticalVelocity -= data.WallJumpDeceleration.y * context.DeltaTime;
+            }
+            else
+            {
+                context.VerticalVelocity -= DownwardForce * context.DeltaTime;
+            }
+
             physicsObject.Move(context.HorizontalVelocity * context.DeltaTime, context.VerticalVelocity * context.DeltaTime);
+        }
+
+        private void SubscribeStates()
+        {
+            Subscribe(Jumping, OnEnter, Jump);
+            Subscribe(RunningJumping, OnEnter, Jump);
+
+            Subscribe(Falling, OnEnter, CutRemainingVelocity);
+            Subscribe(RunningFalling, OnEnter, CutRemainingVelocity);
+
+            Subscribe(WallJumping, OnEnter, () =>
+            {
+                context.HorizontalVelocity = (context.RunInputDirection == HorizontalDirection.Right ? -1 : 1) * data.WallJumpVelocity.x;
+                context.HorizontalVelocity += data.WallJumpDeceleration.x * Mathf.Sign(context.HorizontalVelocity) * context.DeltaTime;
+                context.VerticalVelocity = data.WallJumpVelocity.y + (DownwardForce * context.DeltaTime);
+            });
+
+            void Jump()
+            {
+                if (stateMachine.PreviousState is not (Jumping or RunningJumping or WallJumping))
+                {
+                    context.VerticalVelocity += data.JumpVelocity + (DownwardForce * context.DeltaTime);
+                }
+            }
+
+            void CutRemainingVelocity()
+            {
+                context.VerticalVelocity = Mathf.Clamp(context.VerticalVelocity, context.VerticalVelocity, 0);
+            }
         }
 
         private void Update()
         {
             context.Update();
-        }
-
-        private void AddState(PlayerState state, params IBehaviour[] behaviours)
-        {
-            foreach (var behaviour in behaviours)
-            {
-                state.StateEntered += behaviour.Start;
-                state.StateUpdated += behaviour.Update;
-                state.StateLeft += behaviour.Stop;
-            }
-
-            stateMachine.AddState(state);
         }
 
         public void TransitionTo(PlayerStateEnum nextState)

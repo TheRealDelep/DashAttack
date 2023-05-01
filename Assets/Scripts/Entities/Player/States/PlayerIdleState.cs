@@ -26,7 +26,7 @@ namespace DashAttack.Assets.Scripts.Entities.Player.States
                 return;
             }
 
-            var jumpRequested = Context.JumpInputDown || Context.TimeSinceJumpInputDown < Data.LateJumpBuffer;
+            var jumpRequested = Context.TimeSinceJumpInputDown < Data.LateJumpBuffer;
             if (Context.Collisions.Bottom && jumpRequested)
             {
                 StateMachine.TransitionTo(Jumping);

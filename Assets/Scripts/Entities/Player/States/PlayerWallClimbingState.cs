@@ -2,8 +2,6 @@
 using DashAttack.Entities.Player;
 using DashAttack.Utilities.Enums;
 
-using UnityEngine;
-
 using static DashAttack.Entities.Player.PlayerStateEnum;
 
 namespace DashAttack.Assets.Scripts.Entities.Player.States
@@ -17,8 +15,7 @@ namespace DashAttack.Assets.Scripts.Entities.Player.States
 
         public override void OnStateUpdate()
         {
-            var hasCollisionOnSide = Context.Collisions.Right || Context.Collisions.Left;
-            if (!hasCollisionOnSide || Context.RunInputDirection == HorizontalDirection.None)
+            if (Context.ExitingWall)
             {
                 StateMachine.TransitionTo(Jumping);
                 return;
@@ -34,16 +31,13 @@ namespace DashAttack.Assets.Scripts.Entities.Player.States
                 return;
             }
 
-            if (Context.Collisions.Top ||
-                Context.VerticalVelocity < Mathf.Epsilon ||
-                !Context.JumpInput)
+            if (Context.EndOfJump)
             {
                 StateMachine.TransitionTo(WallSliding);
                 return;
             }
 
-            var jumpRequested = Context.JumpInputDown || Context.TimeSinceJumpInputDown < Data.LateJumpBuffer;
-            if (jumpRequested)
+            if (Context.TimeSinceJumpInputDown < Data.LateJumpBuffer)
             {
                 StateMachine.TransitionTo(WallJumping);
                 return;

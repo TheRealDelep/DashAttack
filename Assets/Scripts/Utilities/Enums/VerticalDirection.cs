@@ -1,4 +1,6 @@
-﻿namespace DashAttack.Utilities.Enums
+﻿using UnityEngine;
+
+namespace DashAttack.Utilities.Enums
 {
     public enum VerticalDirection
     {
@@ -21,8 +23,18 @@
             => direction switch
             {
                 0 => VerticalDirection.None,
-                < 0 => VerticalDirection.Down,
                 > 0 => VerticalDirection.Up,
+                < 0 => VerticalDirection.Down
             };
+
+        public static VerticalDirection ToVerticalDirection(this float direction)
+        {
+            if (direction.IsCloseToZero())
+            {
+                return VerticalDirection.None;
+            }
+
+            return direction < 0 ? VerticalDirection.Down : VerticalDirection.Up;
+        }
     }
 }

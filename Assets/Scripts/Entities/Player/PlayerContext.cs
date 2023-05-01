@@ -32,9 +32,27 @@ namespace DashAttack.Entities.Player
 
         public bool JumpInputDown => InputManager.Instance.JumpPressedThisFixedFrame;
 
+        public bool LastFixedFrameJumpInput { get; private set; }
+
         public float DeltaTime => Time.fixedDeltaTime;
 
         public CollisionInfos Collisions => physicsObject.CollisionInfos;
+
+        public bool RunningIntoWall =>
+            (Collisions.Right && RunInputDirection is HorizontalDirection.Right) ||
+            (Collisions.Left && RunInputDirection is HorizontalDirection.Left);
+
+        public bool EndOfJump =>
+            !JumpInputDown && (
+                Collisions.Top ||
+                VerticalVelocity < Mathf.Epsilon ||
+                !JumpInput);
+
+        public bool ExitingWall => !(Collisions.Right || Collisions.Left) || RunInputDirection == HorizontalDirection.None;
+
+        public bool HasSideCollision => HorizontalVelocity.ToHorizontalDirection() == HorizontalDirection.Right
+                ? Collisions.Right
+                : Collisions.Left;
 
         public float TimeSinceJumpInputDown { get; private set; }
 

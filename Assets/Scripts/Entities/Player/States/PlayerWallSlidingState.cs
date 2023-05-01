@@ -1,7 +1,6 @@
 ﻿using DashAttack.Assets.Scripts.Utilities.StateMachine;
 using DashAttack.Entities.Player;
 using DashAttack.Utilities.Enums;
-using System;
 using static DashAttack.Entities.Player.PlayerStateEnum;
 
 namespace DashAttack.Assets.Scripts.Entities.Player.States
@@ -26,7 +25,6 @@ namespace DashAttack.Assets.Scripts.Entities.Player.States
                 ? HorizontalDirection.Right
                 : HorizontalDirection.Left;
 
-            // Make wallstick ?
             if (Context.RunInputDirection != wallDirection)
             {
                 StateMachine.TransitionTo(RunningFalling);
@@ -39,8 +37,7 @@ namespace DashAttack.Assets.Scripts.Entities.Player.States
                 return;
             }
 
-            var jumpRequested = Context.JumpInputDown || Context.TimeSinceJumpInputDown < Data.LateJumpBuffer;
-            if (jumpRequested)
+            if (Context.TimeSinceJumpInputDown < Data.LateJumpBuffer)
             {
                 StateMachine.TransitionTo(WallJumping);
                 return;

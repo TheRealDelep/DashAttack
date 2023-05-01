@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 using static DashAttack.Utilities.StateMachine.StateEvent;
 
@@ -21,7 +23,11 @@ namespace DashAttack.Utilities.StateMachine
 
         public TStateEnum EntryState { get; private set; }
 
-        public bool LogTransition { get; set; }
+        public bool LogTransitions { get; set; }
+
+#if UNITY_EDITOR
+        private List<TStateEnum> transitionsThisFrame = new();
+#endif
 
         public void AddState(
             TStateEnum stateEnum,
@@ -64,6 +70,13 @@ namespace DashAttack.Utilities.StateMachine
 
         public void RunMachine()
         {
+#if UNITY_EDITOR
+            if (transitionsThisFrame.Any())
+            {
+                transitionsThisFrame.Clear();
+            }
+#endif
+
             BeforeStateUpdate?.Invoke();
             states[CurrentState].OnStateUpdate();
             AfterStateUpdate?.Invoke();
@@ -71,11 +84,19 @@ namespace DashAttack.Utilities.StateMachine
 
         public void TransitionTo(TStateEnum nextState)
         {
-#if DEBUG
-            if (LogTransition)
+#if UNITY_EDITOR
+            if (LogTransitions)
             {
-                UnityEngine.Debug.Log($"Transition from {CurrentState} to {nextState}");
+                Debug.Log($"Transition from {CurrentState} to {nextState}");
             }
+
+            if (transitionsThisFrame.Contains(CurrentState))
+            {
+                Debug.LogError($"Circular transition between states of type: {typeof(TStateEnum)}.  {string.Join(" => ", transitionsThisFrame)}");
+                return;
+            }
+
+            transitionsThisFrame.Add(CurrentState);
 #endif
 
             PreviousState = CurrentState;

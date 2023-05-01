@@ -15,16 +15,13 @@ namespace DashAttack.Assets.Scripts.Entities.Player.States
 
         public override void OnStateUpdate()
         {
-            if (Context.RunInputDirection is HorizontalDirection.None &&
-                (Context.TimeSinceRunInput - (Data.BrakingTime * Data.AirControlAmount)) < Mathf.Epsilon)
+            if (Context.RunInputDirection is HorizontalDirection.None && Context.HorizontalVelocity == 0)
             {
                 StateMachine.TransitionTo(Jumping);
                 return;
             }
 
-            if (Context.Collisions.Top ||
-                Context.VerticalVelocity < Mathf.Epsilon ||
-                !Context.JumpInput)
+            if (Context.EndOfJump)
             {
                 StateMachine.TransitionTo(RunningFalling);
                 return;

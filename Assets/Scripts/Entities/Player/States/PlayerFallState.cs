@@ -20,8 +20,7 @@ namespace DashAttack.Assets.Scripts.Entities.Player.States
                 return;
             }
 
-            if ((Context.Collisions.Right && Context.RunInputDirection is HorizontalDirection.Right) ||
-                (Context.Collisions.Left && Context.RunInputDirection is HorizontalDirection.Left))
+            if (Context.RunningIntoWall)
             {
                 StateMachine.TransitionTo(WallSliding);
                 return;

@@ -1,4 +1,5 @@
 ﻿using Unity.VisualScripting;
+using UnityEngine;
 
 namespace DashAttack.Utilities.Enums
 {
@@ -22,18 +23,20 @@ namespace DashAttack.Utilities.Enums
         public static HorizontalDirection ToHorizontalDirection(this int direction)
             => direction switch
             {
+                0 => HorizontalDirection.None,
                 < 0 => HorizontalDirection.Left,
                 > 0 => HorizontalDirection.Right,
-                _ => HorizontalDirection.None,
             };
 
         public static HorizontalDirection ToHorizontalDirection(this float direction)
-            => direction switch
+        {
+            if (direction.IsCloseToZero())
             {
-                < 0 => HorizontalDirection.Left,
-                > 0 => HorizontalDirection.Right,
-                _ => HorizontalDirection.None,
-            };
+                return HorizontalDirection.None;
+            }
+
+            return direction < 0 ? HorizontalDirection.Left : HorizontalDirection.Right;
+        }
 
         public static bool IsEqual(this HorizontalDirection direction, float directionFloat)
             => directionFloat.ToHorizontalDirection() == direction;

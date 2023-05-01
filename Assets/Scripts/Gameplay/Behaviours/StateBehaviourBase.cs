@@ -38,12 +38,6 @@ namespace DashAttack.Gameplay.Behaviours
         public virtual void Update()
             => stateMachine.RunMachine();
 
-        public virtual void Start()
-        { }
-
-        public virtual void Stop()
-        { }
-
         public void AddState(
             TState state,
             Action onStateEnter = null,
